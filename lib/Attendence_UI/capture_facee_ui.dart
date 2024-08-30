@@ -71,11 +71,10 @@ class _CaptureFaceUIState extends State<CaptureFaceUI> {
       // ).toList();
 
       final inputImageData = InputImageMetadata(
-        size: imageSize,
-        rotation: imageRotation,
-        format: inputImageFormat,
-       bytesPerRow: 5
-      );
+          size: imageSize,
+          rotation: imageRotation,
+          format: inputImageFormat,
+          bytesPerRow: 5);
 
       final inputImage =
           InputImage.fromBytes(bytes: bytes, metadata: inputImageData);
@@ -86,13 +85,13 @@ class _CaptureFaceUIState extends State<CaptureFaceUI> {
         await controller.stopImageStream();
         final image = await controller.takePicture();
         if (!context.mounted) return;
-        await Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => SuccessfulCheckinUserUI(
-              imagePath: image.path,
-            ),
-          ),
-        );
+        // await Navigator.of(context).push(
+        //   MaterialPageRoute(
+        //     builder: (context) => SuccessfulCheckinUserUI(
+        //       imagePath: image.path,
+        //     ),
+        //   ),
+        // );
       }
     } catch (e) {
       print('Error processing image: $e');

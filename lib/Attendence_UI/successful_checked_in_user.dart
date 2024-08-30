@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:hrvms_attendence/Attendence_UI/employee_list_ui.dart';
+import 'package:hrvms_attendence/Attendence_UI/capture_facee_ui.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
 
 class SuccessfulCheckinUserUI extends StatefulWidget {
-  final String imagePath;
-  const SuccessfulCheckinUserUI({super.key, required this.imagePath});
+  final String imagePath; // Declare imagePath as a required parameter
+
+  const SuccessfulCheckinUserUI({Key? key, required this.imagePath})
+      : super(key: key);
 
   @override
   State<SuccessfulCheckinUserUI> createState() =>
@@ -18,18 +19,17 @@ class SuccessfulCheckinUserUI extends StatefulWidget {
 }
 
 class _SuccessfulCheckinUserUIState extends State<SuccessfulCheckinUserUI> {
-   @override
-void initState() {
- Timer(Duration(seconds: 2), (){
-Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> 
- EmployeeListUI()));
-});
- super.initState();
-}
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  late final CameraDescription camera;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     // appBar: AppBar(),
+      // appBar: AppBar(),
       body: Center(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -53,12 +53,14 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
                   const Text(
                     "Check In \n Completed Successfully",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600),
                   ),
                   Stack(
-                   
                     children: [
-                       Container(),
+                      Container(),
                       Center(
                         child: Image.asset(
                           AssetImages.celebrationsBg,
@@ -72,9 +74,10 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
                         child: CircleAvatar(
                           radius: 100,
                           child: ClipOval(
-                            child: Image.file(File(widget.imagePath) ,
-                            fit: BoxFit.cover,
-                             width: MediaQuery.of(context).size.width * 0.3,
+                            child: Image.file(
+                              File(widget.imagePath),
+                              fit: BoxFit.cover,
+                              width: MediaQuery.of(context).size.width * 0.3,
                               height: MediaQuery.of(context).size.width * 0.3,
                             ),
                           ),
@@ -89,10 +92,16 @@ Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white),
                       onPressed: () {
-
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => CaptureFaceUI(
+                              camera: camera,
+                            ),
+                          ),
+                        );
                       },
                       child: const Text(
-                        "Home",
+                        "Thank you",
                         style: TextStyle(
                             fontSize: 20, fontWeight: FontWeight.w600),
                       ))

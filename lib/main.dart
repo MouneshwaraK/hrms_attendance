@@ -1,127 +1,319 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hrvms_attendence/Attendence_UI/capture_facee_ui.dart';
-import 'package:hrvms_attendence/Attendence_UI/employee_list_ui.dart';
+import 'package:face_camera/face_camera.dart';
+import 'package:hrvms_attendence/Attendence_UI/successful_checked_in_user.dart';
+import 'package:hrvms_attendence/Utils/colors.dart';
+import 'package:hrvms_attendence/Utils/images.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await FaceCamera.initialize();
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  File? _capturedImage;
+
+  late FaceCameraController controller;
+  bool isFaceDetected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    initializeCameraFun();
+  }
+
+  void initializeCameraFun() {
+    controller = FaceCameraController(
+      autoCapture: true,
+      defaultCameraLens: CameraLens.front,
+      performanceMode: FaceDetectorMode.fast,
+      onCapture: (File? image) {
+        setState(() {
+          _capturedImage = image;
+        });
+        if (image != null) {
+          WidgetsBinding.instance?.addPostFrameCallback((_) {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => SuccessfulCheckinUserUI(
+                  imagePath: _capturedImage!.path,
+                ),
+              ),
+            );
+          });
+        }
+        print("Image captured: ${_capturedImage?.path}");
+      },
+      onFaceDetected: (Face? face) {
+        setState(() {
+          isFaceDetected = face != null;
+        });
+        if (face != null) {
+          // Capture immediately when a face is detected
+          controller.captureImage();
+        }
+      },
+    );
+    controller.initialize(); // Initialize the controller
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const EmployeeListUI(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('FaceCamera app'),
         ),
+        body: Builder(builder: (context) {
+          if (_capturedImage != null) {
+            WidgetsBinding.instance?.addPostFrameCallback((_) {
+              _navigateToSuccessfulCheckinScreen(context, _capturedImage);
+            });
+          } else {
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    AssetImages.logo,
+                    width: MediaQuery.of(context).size.width * 0.4,
+                    height: MediaQuery.of(context).size.width * 0.2,
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.66,
+                    height: MediaQuery.of(context).size.width * 0.9,
+                    decoration: BoxDecoration(
+                      color: ColorConst().lightRed,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Oops..! Checked in failed.\n Unauthorized User",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 28, fontWeight: FontWeight.w600),
+                          ),
+                          Image.asset(
+                            AssetImages.failedUser,
+                            width: 273,
+                            height: 273,
+                          ),
+                          ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(5)),
+                                  foregroundColor: Colors.black,
+                                  backgroundColor: Colors.white),
+                              onPressed: () {
+                                Navigator.pop(context, false);
+                              },
+                              child: const Text(
+                                "Try again",
+                                style: TextStyle(
+                                    fontSize: 20, fontWeight: FontWeight.w600),
+                              ))
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            );
+          }
+          return SmartFaceCamera(
+            controller: controller,
+            showFlashControl: false,
+            showCameraLensControl: false,
+            showCaptureControl: false,
+            messageBuilder: (context, face) {
+              if (face == null) {
+                return _message('Place your face in the camera');
+              }
+              if (!face.wellPositioned) {
+                return _message('Center your face in the square');
+              }
+              return const SizedBox.shrink();
+            },
+          );
+        }),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<void> _navigateToSuccessfulCheckinScreen(
+      BuildContext context, File? capturedImage) async {
+    // Ensure _capturedImage is not null before navigating
+    if (_capturedImage != null) {
+      // await Navigator.of(context).push(
+      //   MaterialPageRoute(
+      //     builder: (context) => SuccessfulCheckinUserUI(
+      //       imagePath: _capturedImage!.path,
+      //     ),
+      //   ),
+      // );
+      showAlertDialog(context); // Call the method to show AlertDialog
+    } else {
+      // Handle the case where _capturedImage is null
+      print('Error: _capturedImage is null.');
+    }
+  }
+
+  // Method to show the AlertDialog
+  void showAlertDialog(BuildContext context) {
+    // Set up the buttons
+    Widget cancelButton = TextButton(
+      child: Text("Cancel"),
+      onPressed: () {
+        Navigator.pop(context);
+        _refreshScreen();
+      },
+    );
+    Widget continueButton = TextButton(
+      child: Text("Continue"),
+      onPressed: () {
+        Navigator.pop(context);
+        _refreshScreen();
+      },
+    );
+
+    // Set up the AlertDialog
+    AlertDialog alert = AlertDialog(
+      title: const Text("HRVMS"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Image.asset(
+                  AssetImages.logo,
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  height: MediaQuery.of(context).size.width * 0.2,
+                ),
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.66,
+                  height: MediaQuery.of(context).size.width * 0.9,
+                  decoration: BoxDecoration(
+                    color: ColorConst().blue,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const Text(
+                        "Check In \n Completed Successfully",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w600),
+                      ),
+                      Stack(
+                        children: [
+                          Container(),
+                          Center(
+                            child: Image.asset(
+                              AssetImages.celebrationsBg,
+                              width: MediaQuery.of(context).size.width * 0.6,
+                              height: MediaQuery.of(context).size.width * 0.4,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 80,
+                            left: 160,
+                            child: CircleAvatar(
+                              radius: 100,
+                              child: ClipOval(
+                                child: Image.file(
+                                  _capturedImage!,
+                                  fit: BoxFit.cover,
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                  height:
+                                      MediaQuery.of(context).size.width * 0.3,
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5)),
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _refreshScreen();
+                          },
+                          child: const Text(
+                            "Thank you",
+                            style: TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.w600),
+                          ))
+                    ],
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        cancelButton,
+        continueButton,
+      ],
+    );
+
+    // Show the dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
+  }
+
+  void _refreshScreen() {
+    setState(() {
+      _capturedImage = null;
+      isFaceDetected = false;
+    });
+    initializeCameraFun();
+  }
+
+  Widget _message(String msg) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
+        child: Text(
+          msg,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            height: 1.5,
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      );
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
   }
 }
