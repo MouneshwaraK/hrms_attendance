@@ -1,8 +1,10 @@
 import 'dart:io';
-
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
+import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
+import 'package:image_picker/image_picker.dart';
 
 class RegistrationUI extends StatefulWidget {
   const RegistrationUI({super.key});
@@ -156,5 +158,19 @@ class _RegistrationUIState extends State<RegistrationUI> {
         _image = pickedFile;
       });
     }
+  }
+
+  // =================== Registration ======================
+  Future<dynamic> registrationPost(reqObj) async {
+    Response response = await ApiService().postResponseBodyAccessTokenFormData(
+        url: ApiConst.registration, reqObj: reqObj);
+    if (response.statusCode == 503) {
+      throw Exception("No internet connection. Please check your network.");
+    } else if (response.statusCode == 401) {
+      throw Exception("Session expired. Please log in again.");
+    } else if (response.statusCode != 200) {
+      throw Exception("Failed to login. Error: ${response.statusMessage}");
+    }
+    return response;
   }
 }

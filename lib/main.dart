@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
 import 'package:hrvms_attendence/RegistrationUI/register_ui.dart';
-import 'package:hrvms_attendence/loginUI/LoginUI.dart';
+import 'package:hrvms_attendence/loginUI/landingScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const RegistrationUI(),
+      home: const LandingScreen(),
     );
   }
 }

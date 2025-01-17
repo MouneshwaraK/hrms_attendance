@@ -45,6 +45,9 @@ dependencies:
   http_parser: ^4.0.0
   flutter_tts: ^3.0.0
   image_picker: ^1.1.2
+  pretty_dio_logger: ^1.4.0
+  dio: ^5.7.0
+  shared_preferences: ^2.2.3
 
 
 dev_dependencies:
