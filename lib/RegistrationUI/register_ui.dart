@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
 import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
@@ -137,7 +139,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      // Perform registration action
+                      onSubmit();
                     }
                   },
                   child: const Text("Register"),
@@ -160,17 +162,12 @@ class _RegistrationUIState extends State<RegistrationUI> {
     }
   }
 
-  // =================== Registration ======================
-  Future<dynamic> registrationPost(reqObj) async {
-    Response response = await ApiService().postResponseBodyAccessTokenFormData(
-        url: ApiConst.registration, reqObj: reqObj);
-    if (response.statusCode == 503) {
-      throw Exception("No internet connection. Please check your network.");
-    } else if (response.statusCode == 401) {
-      throw Exception("Session expired. Please log in again.");
-    } else if (response.statusCode != 200) {
-      throw Exception("Failed to login. Error: ${response.statusMessage}");
-    }
-    return response;
+  onSubmit() async {
+    var reqObj = <String, dynamic>{
+      'name': firstnameController.text,
+      'user_id': empCodeController.text,
+      'uploaded_file': MultipartFile.fromFile(_image!.path.toString())
+    };
+    var response = await RegisterRepo().registrationPost(reqObj);
   }
 }

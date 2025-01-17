@@ -6,7 +6,7 @@ class ApiService {
   API api = API();
 
   // POST Method
-  Future<Response<dynamic>> postResponseBodyAccessTokenFormData({
+  Future<Response<dynamic>> postResponseBody({
     required String url,
     required Map<String, dynamic> reqObj,
   }) async {
