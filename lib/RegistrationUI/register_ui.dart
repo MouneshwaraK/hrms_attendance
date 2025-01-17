@@ -6,6 +6,7 @@ import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
 import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegistrationUI extends StatefulWidget {
@@ -163,11 +164,39 @@ class _RegistrationUIState extends State<RegistrationUI> {
   }
 
   onSubmit() async {
-    var reqObj = <String, dynamic>{
-      'name': firstnameController.text,
-      'user_id': empCodeController.text,
-      'uploaded_file': MultipartFile.fromFile(_image!.path.toString())
-    };
-    var response = await RegisterRepo().registrationPost(reqObj);
+    FormData formData = FormData.fromMap({
+      "uploaded_file": await MultipartFile.fromFile(_image!.path,
+          filename: _image!.path.split('/').last,
+          // contentType: MediaType.parse(getContentType(_image!.path)),
+          contentType: MediaType("images", 'jpg')),
+      "name": firstnameController.text,
+      "user_id": empCodeController.text,
+    });
+    print(_image!.path);
+    // var reqObj = <String, dynamic>{
+    //   'name': firstnameController.text,
+    //   'user_id': empCodeController.text,
+    //   'uploaded_file': MultipartFile.fromFile(_image!.path.toString())
+    // };
+    var response = await RegisterRepo().registrationPost(formData);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('A SnackBar has been shown.'),
+      ),
+    );
+  }
+
+  // Define getContentType method inside the class
+  String getContentType(String filePath) {
+    String fileExtension = filePath.split('.').last.toLowerCase();
+
+    if (fileExtension == 'jpg' || fileExtension == 'jpeg') {
+      return 'image/jpeg';
+    } else if (fileExtension == 'png') {
+      return 'image/png';
+    } else {
+      throw Exception(
+          'Invalid file type. Only jpg, jpeg, and png are allowed.');
+    }
   }
 }

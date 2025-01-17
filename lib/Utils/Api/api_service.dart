@@ -8,16 +8,15 @@ class ApiService {
   // POST Method
   Future<Response<dynamic>> postResponseBody({
     required String url,
-    required Map<String, dynamic> reqObj,
+    required FormData reqObj,
   }) async {
     try {
-      FormData formData = FormData.fromMap(reqObj);
+      //FormData formData = FormData.fromMap(reqObj);
 
       Response response = await api.sendRequest.post(
         url,
-        data: formData, // Send as FormData
+        data: reqObj, // Send as FormData
         options: Options(headers: {
-          "Content-Type": "multipart/form-data",
           "Accept": "application/json",
         }),
       );

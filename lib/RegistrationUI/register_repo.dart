@@ -11,6 +11,8 @@ class RegisterRepo {
       throw Exception("No internet connection. Please check your network.");
     } else if (response.statusCode == 401) {
       throw Exception("Session expired. Please log in again.");
+    } else if (response.statusCode == 500) {
+      throw Exception("Failed to login. Error: ${response.statusMessage}");
     } else if (response.statusCode != 200) {
       throw Exception("Failed to login. Error: ${response.statusMessage}");
     }
