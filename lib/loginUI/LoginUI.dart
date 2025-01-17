@@ -1,10 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
-import 'package:hrvms_attendence/Attendence_UI/successful_checked_in_user.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 class LoginUI extends StatefulWidget {
   const LoginUI({Key? key}) : super(key: key);
@@ -18,6 +19,9 @@ class _LoginUIState extends State<LoginUI> {
 
   late FaceCameraController controller;
   bool isFaceDetected = false;
+  bool isImageCaptured = false; // New flag to prevent multiple captures
+
+  FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -27,7 +31,7 @@ class _LoginUIState extends State<LoginUI> {
 
   void initializeCameraFun() {
     controller = FaceCameraController(
-      autoCapture: true,
+      autoCapture: false, // Disable auto-capture to validate face first
       defaultCameraLens: CameraLens.front,
       performanceMode: FaceDetectorMode.accurate,
       onCapture: (File? image) {
@@ -35,29 +39,89 @@ class _LoginUIState extends State<LoginUI> {
           _capturedImage = image;
         });
         if (image != null) {
-          WidgetsBinding.instance?.addPostFrameCallback((_) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => SuccessfulCheckinUserUI(
-                  imagePath: _capturedImage!.path,
-                ),
-              ),
-            );
-          });
+          // Upload the image
+          uploadImage(image);
         }
         print("Image captured: ${_capturedImage?.path}");
       },
       onFaceDetected: (Face? face) {
-        setState(() {
-          isFaceDetected = face != null;
-        });
-        if (face != null) {
-          // Capture immediately when a face is detected
-          controller.captureImage();
+        if (face != null && _isFaceValid(face)) {
+          setState(() {
+            isFaceDetected = true;
+          });
+          controller.captureImage(); // Capture image only if valid
+        } else {
+          setState(() {
+            isFaceDetected = false;
+          });
+          // Provide error feedback for invalid detection
+          flutterTts.speak(
+              "Invalid face detected. Please position your face properly.");
+          print('Invalid face detected.');
         }
       },
     );
+
     controller.initialize(); // Initialize the controller
+  }
+
+// Check for essential landmarks
+  bool _isFaceValid(Face face) {
+    FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
+    FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
+    FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
+
+    bool hasEssentialLandmarks =
+        leftEye != null && rightEye != null && noseBase != null;
+
+    return hasEssentialLandmarks;
+  }
+
+  void _refreshScreen() {
+    setState(() {
+      _capturedImage = null;
+      isFaceDetected = false;
+      isImageCaptured = false; // Reset the flag on refresh
+    });
+    initializeCameraFun();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  void uploadImage(File image) async {
+    try {
+      // Create a multipart request
+      final uri = Uri.parse('https://your-server-url.com/upload');
+      final request = http.MultipartRequest('POST', uri);
+
+      // Add the image file as a multipart file
+      final file = await http.MultipartFile.fromPath(
+        'image', // The name of the field in your backend
+        image.path,
+        contentType: MediaType('image', 'jpeg'), // Set content type if needed
+      );
+      request.files.add(file);
+
+      // Add other fields if needed
+      request.fields['user_id'] = '12345'; // Example of adding extra data
+
+      // Send the request
+      final response = await request.send();
+
+      // Check response
+      if (response.statusCode == 200) {
+        print('Image uploaded successfully!');
+        // Navigate to the next screen
+      } else {
+        print('Failed to upload image. Status code: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+    }
   }
 
   @override
@@ -69,7 +133,7 @@ class _LoginUIState extends State<LoginUI> {
         ),
         body: Builder(builder: (context) {
           if (_capturedImage != null) {
-            WidgetsBinding.instance?.addPostFrameCallback((_) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
               _navigateToSuccessfulCheckinScreen(context, _capturedImage);
             });
           } else {
@@ -133,13 +197,18 @@ class _LoginUIState extends State<LoginUI> {
             showFlashControl: false,
             showCameraLensControl: false,
             showCaptureControl: true,
+            indicatorShape: IndicatorShape.defaultShape,
             messageBuilder: (context, face) {
               if (face == null) {
-                return _message('Place your face in the camera');
-              }
-              if (!face.wellPositioned) {
+                flutterTts
+                    .speak("No face detected. Place your face in the camera.");
+                return _message(
+                    'No face detected. Place your face in the camera.');
+              } else if (!face.wellPositioned) {
+                flutterTts.speak("Center your face in the square");
                 return _message('Center your face in the square');
               }
+
               return const SizedBox.shrink();
             },
           );
@@ -278,14 +347,6 @@ class _LoginUIState extends State<LoginUI> {
     );
   }
 
-  void _refreshScreen() {
-    setState(() {
-      _capturedImage = null;
-      isFaceDetected = false;
-    });
-    initializeCameraFun();
-  }
-
   Widget _message(String msg) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
         child: Text(
@@ -298,10 +359,4 @@ class _LoginUIState extends State<LoginUI> {
           ),
         ),
       );
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 }
