@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
@@ -20,6 +21,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   XFile? _image;
   File? file;
+  FlutterTts flutterTts = FlutterTts();
 
   @override
   Widget build(BuildContext context) {
@@ -214,8 +216,11 @@ class _RegistrationUIState extends State<RegistrationUI> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        flutterTts.speak("Thank you for Registering");
+        clearForm();
         print("Response: ${response.data}");
       } else {
+        flutterTts.speak("Sorry somthing went worng.. Please Tryi again");
         print("Error: ${response.statusCode} - ${response.statusMessage}");
         print("Response body: ${response.data}");
       }
@@ -227,5 +232,15 @@ class _RegistrationUIState extends State<RegistrationUI> {
         ),
       );
     }
+  }
+
+// Optional: Method to clear form fields
+  void clearForm() {
+    firstnameController.clear();
+    lastnameController.clear();
+    empCodeController.clear();
+    setState(() {
+      _image = null;
+    });
   }
 }

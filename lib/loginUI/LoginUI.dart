@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
 import 'package:http/http.dart' as http;
@@ -105,34 +108,53 @@ class _LoginUIState extends State<LoginUI> {
 
   void uploadImage(File image) async {
     try {
-      // Create a multipart request
-      final uri = Uri.parse('https://your-server-url.com/upload');
-      final request = http.MultipartRequest('POST', uri);
+      // Prepare form data
+      FormData formData = FormData.fromMap({
+        "uploaded_file": await MultipartFile.fromFile(
+          image.path,
+          filename: image.path.split('/').last,
+          contentType: MediaType('image', 'jpeg'), // Ensure proper content type
+        ),
+      });
 
-      // Add the image file as a multipart file
-      final file = await http.MultipartFile.fromPath(
-        'image', // The name of the field in your backend
-        image.path,
-        contentType: MediaType('image', 'jpeg'), // Set content type if needed
+      // Call the login API
+      Response response = await ApiService().validateUser(
+        url: "http://34.228.44.206:8000/face_recognition/",
+        reqObj: formData,
       );
-      request.files.add(file);
 
-      // Add other fields if needed
-      request.fields['user_id'] = '12345'; // Example of adding extra data
-
-      // Send the request
-      final response = await request.send();
-
-      // Check response
       if (response.statusCode == 200) {
-        print('Image uploaded successfully!');
-        // Navigate to the next screen
+        print('User validated successfully!');
+        await flutterTts.speak("Thank you!");
+        setState(() {
+          isFaceDetected = true;
+        });
       } else {
-        print('Failed to upload image. Status code: ${response.statusCode}');
+        print("Error: ${response.statusCode} - ${response.statusMessage}");
+        print("Response body: ${response.data}");
+        await flutterTts.speak(
+            "Invalid user detected. Please try again or contact support.");
+        _showInvalidUserUI();
       }
+    } on DioException catch (e) {
+      print("Dio error occurred: ${e.message}");
+      await flutterTts.speak(
+          "An error occurred while validating your face. Please try again.");
+      _showInvalidUserUI();
     } catch (e) {
-      print('Error uploading image: $e');
+      print("Unexpected error: $e");
+      await flutterTts.speak(
+          "An unexpected error occurred while validating your face. Please try again.");
+      _showInvalidUserUI();
     }
+  }
+
+  void _showInvalidUserUI() {
+    setState(() {
+      _capturedImage = null;
+      isFaceDetected = false;
+      isImageCaptured = false;
+    });
   }
 
   @override
@@ -145,7 +167,7 @@ class _LoginUIState extends State<LoginUI> {
         body: Builder(builder: (context) {
           if (_capturedImage != null) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
-              _navigateToSuccessfulCheckinScreen(context, _capturedImage);
+              // _navigateToSuccessfulCheckinScreen(context, _capturedImage);
             });
           } else {
             Center(
