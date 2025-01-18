@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
@@ -19,7 +20,8 @@ class _LoginUIState extends State<LoginUI> {
 
   late FaceCameraController controller;
   bool isFaceDetected = false;
-  bool isImageCaptured = false; // New flag to prevent multiple captures
+  bool isImageCaptured = false;
+  Timer? debounceTimer; // Timer to debounce face detection
 
   FlutterTts flutterTts = FlutterTts();
 
@@ -37,27 +39,38 @@ class _LoginUIState extends State<LoginUI> {
       onCapture: (File? image) {
         setState(() {
           _capturedImage = image;
+          isImageCaptured = false; // Reset the flag after capture
         });
         if (image != null) {
-          // Upload the image
           uploadImage(image);
         }
-        print("Image captured: ${_capturedImage?.path}");
       },
-      onFaceDetected: (Face? face) {
+      onFaceDetected: (Face? face) async {
         if (face != null && _isFaceValid(face)) {
-          setState(() {
-            isFaceDetected = true;
-          });
-          controller.captureImage(); // Capture image only if valid
+          if (!isImageCaptured) {
+            setState(() {
+              isImageCaptured = true; // Prevent further captures
+            });
+
+            // Capture the image
+            controller.captureImage();
+
+            // Reset the flag after processing
+            await Future.delayed(const Duration(
+                seconds: 1)); // Small delay to avoid quick resets
+            setState(() {
+              isImageCaptured = false;
+            });
+          }
         } else {
-          setState(() {
-            isFaceDetected = false;
-          });
-          // Provide error feedback for invalid detection
-          flutterTts.speak(
-              "Invalid face detected. Please position your face properly.");
-          print('Invalid face detected.');
+          if (mounted) {
+            setState(() {
+              isFaceDetected = false;
+              isImageCaptured = false;
+            });
+            flutterTts.speak(
+                "Invalid face detected. Please position your face properly.");
+          }
         }
       },
     );
@@ -65,16 +78,13 @@ class _LoginUIState extends State<LoginUI> {
     controller.initialize(); // Initialize the controller
   }
 
-// Check for essential landmarks
+  // Check for essential landmarks
   bool _isFaceValid(Face face) {
     FaceLandmark? leftEye = face.landmarks[FaceLandmarkType.leftEye];
     FaceLandmark? rightEye = face.landmarks[FaceLandmarkType.rightEye];
     FaceLandmark? noseBase = face.landmarks[FaceLandmarkType.noseBase];
 
-    bool hasEssentialLandmarks =
-        leftEye != null && rightEye != null && noseBase != null;
-
-    return hasEssentialLandmarks;
+    return leftEye != null && rightEye != null && noseBase != null;
   }
 
   void _refreshScreen() {
@@ -89,6 +99,7 @@ class _LoginUIState extends State<LoginUI> {
   @override
   void dispose() {
     controller.dispose();
+    flutterTts.stop(); // Stop any ongoing TTS
     super.dispose();
   }
 
@@ -219,132 +230,18 @@ class _LoginUIState extends State<LoginUI> {
 
   Future<void> _navigateToSuccessfulCheckinScreen(
       BuildContext context, File? capturedImage) async {
-    // Ensure _capturedImage is not null before navigating
-    if (_capturedImage != null) {
-      showAlertDialog(context); // Call the method to show AlertDialog
-    } else {
-      // Handle the case where _capturedImage is null
-      print('Error: _capturedImage is null.');
-    }
-  }
+    if (!mounted || capturedImage == null)
+      return; // Ensure widget is still active
 
-  // Method to show the AlertDialog
-  void showAlertDialog(BuildContext context) {
-    // Set up the buttons
-    Widget cancelButton = TextButton(
-      child: Text("Cancel"),
-      onPressed: () {
-        Navigator.pop(context);
-        _refreshScreen();
-      },
-    );
-    Widget continueButton = TextButton(
-      child: Text("Continue"),
-      onPressed: () {
-        Navigator.pop(context);
-        _refreshScreen();
-      },
-    );
-
-    // Set up the AlertDialog
-    AlertDialog alert = AlertDialog(
-      title: const Text("HRVMS"),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Image.asset(
-                  AssetImages.logo,
-                  width: MediaQuery.of(context).size.width * 0.4,
-                  height: MediaQuery.of(context).size.width * 0.2,
-                ),
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.66,
-                  height: MediaQuery.of(context).size.width * 0.9,
-                  decoration: BoxDecoration(
-                    color: ColorConst().blue,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const Text(
-                        "Check In \n Completed Successfully",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w600),
-                      ),
-                      Stack(
-                        children: [
-                          Container(),
-                          Center(
-                            child: Image.asset(
-                              AssetImages.celebrationsBg,
-                              width: MediaQuery.of(context).size.width * 0.6,
-                              height: MediaQuery.of(context).size.width * 0.4,
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 80,
-                            left: 160,
-                            child: CircleAvatar(
-                              radius: 100,
-                              child: ClipOval(
-                                child: Image.file(
-                                  _capturedImage!,
-                                  fit: BoxFit.cover,
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  height:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5)),
-                              foregroundColor: Colors.black,
-                              backgroundColor: Colors.white),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            _refreshScreen();
-                          },
-                          child: const Text(
-                            "Thank you",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w600),
-                          ))
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ],
-      ),
-      actions: [
-        cancelButton,
-        continueButton,
-      ],
-    );
-
-    // Show the dialog
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return alert;
-      },
-    );
+    // Speak the "Thank you" message
+    await flutterTts.speak("Thank you!!!.");
+    print("Mounesh");
+    // Optionally refresh the screen or navigate after the message
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) {
+        _refreshScreen(); // Reset the screen after the voice message
+      }
+    });
   }
 
   Widget _message(String msg) => Padding(
@@ -353,9 +250,9 @@ class _LoginUIState extends State<LoginUI> {
           msg,
           textAlign: TextAlign.center,
           style: const TextStyle(
-            fontSize: 14,
-            height: 1.5,
-            fontWeight: FontWeight.w400,
+            fontSize: 25,
+            color: Colors.red,
+            fontWeight: FontWeight.bold,
           ),
         ),
       );

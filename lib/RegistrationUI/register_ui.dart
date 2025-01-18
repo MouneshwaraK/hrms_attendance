@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
-import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
-import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 
 class RegistrationUI extends StatefulWidget {
@@ -155,7 +152,33 @@ class _RegistrationUIState extends State<RegistrationUI> {
 
   Future<void> _clickImage(BuildContext context) async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    // Show dialog to choose camera or gallery
+    final pickedFile = await showDialog<XFile?>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose Image Source'),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () async {
+                  Navigator.pop(context,
+                      await picker.pickImage(source: ImageSource.camera));
+                },
+                child: Text('Camera')),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context,
+                    await picker.pickImage(source: ImageSource.gallery));
+              },
+              child: Text('Gallery'),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If an image is selected, update the state
     if (pickedFile != null) {
       setState(() {
         _image = pickedFile;
@@ -164,39 +187,45 @@ class _RegistrationUIState extends State<RegistrationUI> {
   }
 
   onSubmit() async {
-    FormData formData = FormData.fromMap({
-      "uploaded_file": await MultipartFile.fromFile(_image!.path,
+    if (_image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please upload an image to proceed.'),
+        ),
+      );
+      return;
+    }
+
+    try {
+      // Prepare form data
+      FormData formData = FormData.fromMap({
+        "uploaded_file": await MultipartFile.fromFile(
+          _image!.path,
           filename: _image!.path.split('/').last,
-          // contentType: MediaType.parse(getContentType(_image!.path)),
-          contentType: MediaType("images", 'jpg')),
-      "name": firstnameController.text,
-      "user_id": empCodeController.text,
-    });
-    print(_image!.path);
-    // var reqObj = <String, dynamic>{
-    //   'name': firstnameController.text,
-    //   'user_id': empCodeController.text,
-    //   'uploaded_file': MultipartFile.fromFile(_image!.path.toString())
-    // };
-    var response = await RegisterRepo().registrationPost(formData);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('A SnackBar has been shown.'),
-      ),
-    );
-  }
+        ),
+        "name": firstnameController.text,
+        "user_id": empCodeController.text,
+      });
 
-  // Define getContentType method inside the class
-  String getContentType(String filePath) {
-    String fileExtension = filePath.split('.').last.toLowerCase();
+      // Send the FormData to the API
+      Response response = await ApiService().postResponseBody(
+        url: "http://34.228.44.206:8000/face_register/",
+        reqObj: formData,
+      );
 
-    if (fileExtension == 'jpg' || fileExtension == 'jpeg') {
-      return 'image/jpeg';
-    } else if (fileExtension == 'png') {
-      return 'image/png';
-    } else {
-      throw Exception(
-          'Invalid file type. Only jpg, jpeg, and png are allowed.');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("Response: ${response.data}");
+      } else {
+        print("Error: ${response.statusCode} - ${response.statusMessage}");
+        print("Response body: ${response.data}");
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error occurred: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 }

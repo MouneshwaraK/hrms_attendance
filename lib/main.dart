@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
-import 'package:hrvms_attendence/RegistrationUI/register_ui.dart';
 import 'package:hrvms_attendence/loginUI/landingScreen.dart';
 
 void main() async {

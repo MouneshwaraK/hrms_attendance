@@ -16,8 +16,6 @@ class LandingScreen extends StatefulWidget {
 }
 
 class _LandingScreenState extends State<LandingScreen> {
-  late final CameraDescription camera;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,15 +82,7 @@ class _LandingScreenState extends State<LandingScreen> {
                               borderRadius: BorderRadius.circular(5)),
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => CaptureFaceUI(
-                              camera: camera,
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed: () {},
                       child: GestureDetector(
                         child: const Text(
                           "Register with Your Image and USER ID",
@@ -113,15 +103,7 @@ class _LandingScreenState extends State<LandingScreen> {
                               borderRadius: BorderRadius.circular(5)),
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => CaptureFaceUI(
-                              camera: camera,
-                            ),
-                          ),
-                        );
-                      },
+                      onPressed: () {},
                       child: GestureDetector(
                         child: const Text(
                           "Login",
