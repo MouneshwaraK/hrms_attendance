@@ -1,10 +1,7 @@
-import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
-import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
-import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
@@ -179,6 +176,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
     //   'uploaded_file': MultipartFile.fromFile(_image!.path.toString())
     // };
     var response = await RegisterRepo().registrationPost(formData);
+    print(response);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('A SnackBar has been shown.'),
