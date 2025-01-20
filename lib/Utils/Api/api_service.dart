@@ -74,7 +74,7 @@ class ApiService {
         data: reqObj, // Use the original FormData
         options: Options(headers: {
           "Accept": "application/json",
-          "Content-Type": "multipart/form-data", // Explicitly set Content-Type
+          "Content-Type": "	multipart/form-data",
         }),
       );
       return response;

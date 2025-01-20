@@ -9,8 +9,7 @@ import 'package:hrvms_attendence/Utils/images.dart';
 class SuccessfulCheckinUserUI extends StatefulWidget {
   final String imagePath; // Declare imagePath as a required parameter
 
-  const SuccessfulCheckinUserUI({Key? key, required this.imagePath})
-      : super(key: key);
+  const SuccessfulCheckinUserUI({super.key, required this.imagePath});
 
   @override
   State<SuccessfulCheckinUserUI> createState() =>

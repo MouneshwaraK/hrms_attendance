@@ -8,11 +8,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
-import 'package:http/http.dart' as http;
-import 'package:http_parser/http_parser.dart';
+import 'package:image/image.dart' as img;
 
 class LoginUI extends StatefulWidget {
-  const LoginUI({Key? key}) : super(key: key);
+  const LoginUI({super.key});
 
   @override
   State<LoginUI> createState() => _LoginUIState();
@@ -108,21 +107,33 @@ class _LoginUIState extends State<LoginUI> {
 
   void uploadImage(File image) async {
     try {
-      // Prepare form data
-      FormData formData = FormData.fromMap({
-        "uploaded_file": await MultipartFile.fromFile(
-          image.path,
-          filename: image.path.split('/').last,
-          contentType: MediaType('image', 'jpeg'), // Ensure proper content type
-        ),
-      });
+      // Read the image file and decode it
+      img.Image originalImage = img.decodeImage(await image.readAsBytes())!;
 
+      // Resize the image to width 800 while maintaining aspect ratio
+      img.Image resizedImage = img.copyResize(originalImage, width: 800);
+
+      // Compress and save the resized image to a temporary file
+      File compressedFile = File(image.path)
+        ..writeAsBytesSync(img.encodeJpg(
+          resizedImage,
+        ));
+
+      // Read compressed image bytes and convert to Base64
+      List<int> compressedImageBytes = await compressedFile.readAsBytes();
+      String base64Image = base64Encode(compressedImageBytes);
+
+      // Prepare form data with Base64 encoded string
+      FormData formData = FormData.fromMap({
+        "uploaded_file": base64Image, // Sending Base64 encoded image
+      });
+      print(base64Image);
       // Call the login API
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: formData,
       );
-
+      print(image.path);
       if (response.statusCode == 200) {
         print('User validated successfully!');
         await flutterTts.speak("Thank you!");

@@ -48,6 +48,7 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   dio: ^5.7.0
   shared_preferences: ^2.2.3
+  image: ^4.5.2
 
 
 dev_dependencies:

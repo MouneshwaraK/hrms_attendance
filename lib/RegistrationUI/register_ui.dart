@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:hrvms_attendence/RegistrationUI/register_repo.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 class RegistrationUI extends StatefulWidget {
   const RegistrationUI({super.key});
@@ -22,6 +22,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
   XFile? _image;
   File? file;
   FlutterTts flutterTts = FlutterTts();
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -142,9 +143,19 @@ class _RegistrationUIState extends State<RegistrationUI> {
                       onSubmit();
                     }
                   },
-                  child: const Text("Register"),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.white,
+                        )
+                      : const Text("Register"),
                 ),
               ),
+              const SizedBox(
+                height: 20,
+              ),
+              isLoading
+                  ? const Text("Please wait while registering your face......")
+                  : const Text(""),
             ],
           ),
         ),
@@ -160,20 +171,24 @@ class _RegistrationUIState extends State<RegistrationUI> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Choose Image Source'),
+          title: const Text('Choose Image Source'),
           actions: <Widget>[
             TextButton(
                 onPressed: () async {
-                  Navigator.pop(context,
-                      await picker.pickImage(source: ImageSource.camera));
+                  Navigator.pop(
+                      context,
+                      await picker.pickImage(
+                        source: ImageSource.camera,
+                        imageQuality: 70, // Compress the image to reduce size
+                      ));
                 },
-                child: Text('Camera')),
+                child: const Text('Camera')),
             TextButton(
               onPressed: () async {
                 Navigator.pop(context,
                     await picker.pickImage(source: ImageSource.gallery));
               },
-              child: Text('Gallery'),
+              child: const Text('Gallery'),
             ),
           ],
         );
@@ -189,23 +204,37 @@ class _RegistrationUIState extends State<RegistrationUI> {
   }
 
   onSubmit() async {
+    setState(() {
+      isLoading = true;
+    });
     if (_image == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please upload an image to proceed.'),
         ),
       );
+      setState(() {
+        isLoading = false;
+      });
       return;
     }
-
     try {
+      // Compress and resize image
+      File imageFile = File(_image!.path);
+      img.Image originalImage = img.decodeImage(await imageFile.readAsBytes())!;
+      img.Image resizedImage = img.copyResize(originalImage, width: 800);
+
+      File compressedFile = File(imageFile.path)
+        ..writeAsBytesSync(img.encodeJpg(
+          resizedImage,
+        ));
       // Prepare form data
       FormData formData = FormData.fromMap({
         "uploaded_file": await MultipartFile.fromFile(
-          _image!.path,
-          filename: _image!.path.split('/').last,
+          compressedFile.path,
+          filename: compressedFile.path.split('/').last,
         ),
-        "name": firstnameController.text,
+        "name": "${firstnameController.text} ${lastnameController.text}",
         "user_id": empCodeController.text,
       });
 
@@ -216,13 +245,20 @@ class _RegistrationUIState extends State<RegistrationUI> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        flutterTts.speak("Thank you for Registering");
+        flutterTts.speak("Thank you for Registering.");
         clearForm();
+        Navigator.pop(context);
         print("Response: ${response.data}");
+        setState(() {
+          isLoading = false;
+        });
       } else {
-        flutterTts.speak("Sorry somthing went worng.. Please Tryi again");
+        flutterTts.speak("Sorry somthing went worng.. Please Try again");
         print("Error: ${response.statusCode} - ${response.statusMessage}");
         print("Response body: ${response.data}");
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -231,6 +267,9 @@ class _RegistrationUIState extends State<RegistrationUI> {
           backgroundColor: Colors.red,
         ),
       );
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
 
@@ -23,11 +22,11 @@ class _FailedCheckedInUserUIState extends State<FailedCheckedInUserUI> {
             Image.asset(
               AssetImages.logo,
               width: MediaQuery.of(context).size.width * 0.4,
-               height: MediaQuery.of(context).size.width * 0.2,
+              height: MediaQuery.of(context).size.width * 0.2,
             ),
             Container(
-               width: MediaQuery.of(context).size.width * 0.66,
-               height: MediaQuery.of(context).size.width * 0.9,
+              width: MediaQuery.of(context).size.width * 0.66,
+              height: MediaQuery.of(context).size.width * 0.9,
               decoration: BoxDecoration(
                 color: ColorConst().lightRed,
                 borderRadius: BorderRadius.circular(20),
@@ -50,10 +49,10 @@ class _FailedCheckedInUserUIState extends State<FailedCheckedInUserUI> {
                     ),
                     ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(5)),
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white
-                        ),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5)),
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white),
                         onPressed: () {},
                         child: const Text(
                           "Try again",

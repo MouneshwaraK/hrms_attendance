@@ -1,5 +1,6 @@
-class AssetImages{
-   static const logo = "assets/images/logo.png";
-   static const failedUser = "assets/images/failedUser.png";
-   static const celebrationsBg = "assets/images/celebrationbg.png";
+class AssetImages {
+  static const logo = "assets/images/logo.png";
+  static const failedUser = "assets/images/failedUser.png";
+  static const celebrationsBg = "assets/images/celebrationbg.png";
+  static const landingScreen = "assets/images/landingScreen.png";
 }

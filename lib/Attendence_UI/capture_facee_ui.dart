@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
 
@@ -82,7 +83,7 @@ class _CaptureFaceUIState extends State<CaptureFaceUI> {
       if (faces.isNotEmpty) {
         faceDetected = true;
         await controller.stopImageStream();
-        final image = await controller.takePicture();
+        //final image = await controller.takePicture();
         if (!context.mounted) return;
         // await Navigator.of(context).push(
         //   MaterialPageRoute(
@@ -122,7 +123,7 @@ class _CaptureFaceUIState extends State<CaptureFaceUI> {
                       style:
                           TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
                     ),
-                    Container(
+                    SizedBox(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height * 0.7,
                       child: CameraPreview(controller),
