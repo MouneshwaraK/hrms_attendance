@@ -135,16 +135,19 @@ class _LoginUIState extends State<LoginUI> {
       );
       print(image.path);
       if (response.statusCode == 200) {
-        // Parse the response body
-        Map<String, dynamic> responseData = jsonDecode(response.data);
-
-        // Access the name field
+        print('User validated successfully!');
+        Map<String, dynamic> responseData = response.data;
         String name = responseData['recognized_face_data']['name'];
-
-        // Print the name after "Thank you!"
         String message = "Thank you, $name!";
-        print(message);
         await flutterTts.speak(message);
+        _showInvalidUserUI();
+
+        // Reset the screen for the next user
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted) {
+            _refreshScreen();
+          }
+        });
         setState(() {
           isFaceDetected = true;
         });
@@ -152,7 +155,7 @@ class _LoginUIState extends State<LoginUI> {
         print("Error: ${response.statusCode} - ${response.statusMessage}");
         print("Response body: ${response.data}");
         await flutterTts.speak(
-            "Invalid user detected. Please try again or contact support.");
+            "An error occurred while validating your face. Please try again.");
         _showInvalidUserUI();
       }
     } on DioException catch (e) {
