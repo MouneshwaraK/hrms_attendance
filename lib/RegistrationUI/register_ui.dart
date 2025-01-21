@@ -248,14 +248,11 @@ class _RegistrationUIState extends State<RegistrationUI> {
         flutterTts.speak("Thank you for Registering.");
         clearForm();
         Navigator.pop(context);
-        print("Response: ${response.data}");
         setState(() {
           isLoading = false;
         });
       } else {
         flutterTts.speak("Sorry somthing went worng.. Please Try again");
-        print("Error: ${response.statusCode} - ${response.statusMessage}");
-        print("Response body: ${response.data}");
         setState(() {
           isLoading = false;
         });

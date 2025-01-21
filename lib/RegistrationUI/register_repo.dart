@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
+import 'package:hrvms_attendence/Utils/Api/api_const.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 
 class RegisterRepo {
