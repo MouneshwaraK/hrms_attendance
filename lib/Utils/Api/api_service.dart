@@ -65,7 +65,7 @@ class ApiService {
   // POST Method for Login Validation
   Future<Response<dynamic>> validateUser({
     required String url,
-    required FormData reqObj,
+    required String reqObj,
   }) async {
     try {
       // Send the FormData directly
@@ -74,7 +74,7 @@ class ApiService {
         data: reqObj, // Use the original FormData
         options: Options(headers: {
           "Accept": "application/json",
-          "Content-Type": "	multipart/form-data",
+          "Content-Type": "application/json",
         }),
       );
       return response;

@@ -115,28 +115,36 @@ class _LoginUIState extends State<LoginUI> {
 
       // Compress and save the resized image to a temporary file
       File compressedFile = File(image.path)
-        ..writeAsBytesSync(img.encodeJpg(
-          resizedImage,
-        ));
+        ..writeAsBytesSync(img.encodeJpg(resizedImage));
 
       // Read compressed image bytes and convert to Base64
       List<int> compressedImageBytes = await compressedFile.readAsBytes();
       String base64Image = base64Encode(compressedImageBytes);
 
-      // Prepare form data with Base64 encoded string
-      FormData formData = FormData.fromMap({
-        "uploaded_file": base64Image, // Sending Base64 encoded image
-      });
-      print(base64Image);
+      // Prepend the Base64 prefix
+      String prefixedBase64Image = "data:image/jpeg;base64,$base64Image";
+
+      // Create the JSON payload
+      Map<String, dynamic> payload = {
+        "image": prefixedBase64Image, // Add the Base64 string directly
+      };
       // Call the login API
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
-        reqObj: formData,
+        reqObj: jsonEncode(payload),
       );
       print(image.path);
       if (response.statusCode == 200) {
-        print('User validated successfully!');
-        await flutterTts.speak("Thank you!");
+        // Parse the response body
+        Map<String, dynamic> responseData = jsonDecode(response.data);
+
+        // Access the name field
+        String name = responseData['recognized_face_data']['name'];
+
+        // Print the name after "Thank you!"
+        String message = "Thank you, $name!";
+        print(message);
+        await flutterTts.speak(message);
         setState(() {
           isFaceDetected = true;
         });
