@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:hrvms_attendence/Utils/Api/api.dart';
@@ -66,12 +67,20 @@ class ApiService {
   Future<Response<dynamic>> validateUser({
     required String url,
     required String reqObj,
+    required String device_status,
   }) async {
     try {
-      // Send the FormData directly
+      // Decode the existing JSON object and add the device_status
+      Map<String, dynamic> payload = jsonDecode(reqObj);
+      payload['device_status'] = device_status;
+
+      // Encode the modified payload back to JSON
+      String updatedReqObj = jsonEncode(payload);
+
+      // Send the updated JSON payload
       Response response = await api.sendRequest.post(
         url,
-        data: reqObj, // Use the original FormData
+        data: updatedReqObj,
         options: Options(headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",

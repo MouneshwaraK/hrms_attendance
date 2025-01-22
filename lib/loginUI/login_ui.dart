@@ -24,6 +24,7 @@ class _LoginUIState extends State<LoginUI> {
   bool isFaceDetected = false;
   bool isImageCaptured = false;
   Timer? debounceTimer; // Timer to debounce face detection
+  bool hasSpoken = false; // Prevent repeated actions
 
   FlutterTts flutterTts = FlutterTts();
 
@@ -117,9 +118,12 @@ class _LoginUIState extends State<LoginUI> {
       Map<String, dynamic> payload = {
         "image": prefixedBase64Image,
       };
+
+// Call the login API
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
+        device_status: "in", // Provide the required device_status argument
       );
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = response.data;
@@ -136,17 +140,18 @@ class _LoginUIState extends State<LoginUI> {
           isFaceDetected = true;
         });
       } else {
-        await flutterTts.speak(
-            "An error occurred while validating your face. Please try again.");
+        print("Error: ${response.statusCode} - ${response.statusMessage}");
+        print("Response body: ${response.data}");
+        await flutterTts.speak("Invalid User Please try again.");
         _showInvalidUserUI();
       }
-    } on DioException {
-      await flutterTts.speak(
-          "An error occurred while validating your face. Please try again.");
+    } on DioException catch (e) {
+      print("Dio error occurred: ${e.message}");
+      await flutterTts.speak("Invalid User Please try again.");
       _showInvalidUserUI();
     } catch (e) {
-      await flutterTts.speak(
-          "An unexpected error occurred while validating your face. Please try again.");
+      print("Unexpected error: $e");
+      await flutterTts.speak("Invalid User Please try again.");
       _showInvalidUserUI();
     }
   }
@@ -156,6 +161,7 @@ class _LoginUIState extends State<LoginUI> {
       _capturedImage = null;
       isFaceDetected = false;
       isImageCaptured = false;
+      _refreshScreen();
     });
   }
 
@@ -235,14 +241,39 @@ class _LoginUIState extends State<LoginUI> {
             indicatorShape: IndicatorShape.defaultShape,
             messageBuilder: (context, face) {
               if (face == null) {
-                flutterTts
-                    .speak("No face detected. Place your face in the camera.");
-                return _message(
-                    'No face detected. Place your face in the camera.');
+                debounceTimer
+                    ?.cancel(); // Cancel timer when no face is detected
+                if (!hasSpoken) {
+                  flutterTts.speak(
+                      "No face detected. Place your face in the camera.");
+                  updateStateSafely(() {
+                    hasSpoken = true;
+                  });
+                }
+                return _message('No face detected');
               } else if (!face.wellPositioned) {
-                flutterTts.speak("Center your face in the square");
+                if (!hasSpoken) {
+                  flutterTts.speak("Center your face in the square");
+                  // Set a cooldown timer to avoid repeated actions
+                  debounceTimer?.cancel();
+                  debounceTimer = Timer(Duration(seconds: 2), () {
+                    updateStateSafely(() {
+                      hasSpoken = false;
+                    });
+                  });
+                  updateStateSafely(() {
+                    hasSpoken = true;
+                  });
+                }
+
                 return _message('Center your face in the square');
               }
+
+              // Reset the flag when the face is well-positioned
+              debounceTimer?.cancel();
+              updateStateSafely(() {
+                hasSpoken = false;
+              });
 
               return const SizedBox.shrink();
             },
@@ -252,21 +283,16 @@ class _LoginUIState extends State<LoginUI> {
     );
   }
 
-  // Future<void> _navigateToSuccessfulCheckinScreen(
-  //     BuildContext context, File? capturedImage) async {
-  //   if (!mounted || capturedImage == null)
-  //     return; // Ensure widget is still active
-
-  //   // Speak the "Thank you" message
-  //   await flutterTts.speak("Thank you!!!.");
-  //   print("Mounesh");
-  //   // Optionally refresh the screen or navigate after the message
-  //   Future.delayed(const Duration(seconds: 3), () {
-  //     if (mounted) {
-  //       _refreshScreen(); // Reset the screen after the voice message
-  //     }
-  //   });
-  // }
+  void updateStateSafely(Function updateAction) {
+    // Ensures state updates are safe and do not conflict with the build process
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        setState(() {
+          updateAction();
+        });
+      }
+    });
+  }
 
   Widget _message(String msg) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
