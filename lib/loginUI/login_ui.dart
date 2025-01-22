@@ -125,14 +125,15 @@ class _LoginUIState extends State<LoginUI> {
       // Prepend the Base64 prefix
       String prefixedBase64Image = "data:image/jpeg;base64,$base64Image";
 
-      // Create the JSON payload
       Map<String, dynamic> payload = {
         "image": prefixedBase64Image, // Add the Base64 string directly
       };
-      // Call the login API
+
+// Call the login API
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
+        device_status: "in", // Provide the required device_status argument
       );
       print(image.path);
       if (response.statusCode == 200) {
