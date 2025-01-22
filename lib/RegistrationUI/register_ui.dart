@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -245,17 +246,33 @@ class _RegistrationUIState extends State<RegistrationUI> {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        flutterTts.speak("Thank you for Registering.");
-        clearForm();
-        Navigator.pop(context);
-        print("Response: ${response.data}");
+        try {
+          // Ensure response.data is a JSON string or Map
+          Map<String, dynamic> responseBody;
+
+          if (response.data is String) {
+            responseBody = jsonDecode(response.data);
+          } else if (response.data is Map<String, dynamic>) {
+            responseBody = response.data;
+          } else {
+            throw Exception("Unexpected response format");
+          }
+
+          // Safely extract the 'detail' key
+          String successDetail =
+              responseBody['detail']?.toString() ?? "Unknown error";
+          // Print and use the success detail
+          print(successDetail);
+          flutterTts.speak(successDetail);
+        } catch (e) {
+          // Log or handle exceptions
+          print("An error occurred while parsing the response: $e");
+          flutterTts.speak("An unexpected error occurred.");
+        }
         setState(() {
           isLoading = false;
         });
       } else {
-        flutterTts.speak("Sorry somthing went worng.. Please Try again");
-        print("Error: ${response.statusCode} - ${response.statusMessage}");
-        print("Response body: ${response.data}");
         setState(() {
           isLoading = false;
         });

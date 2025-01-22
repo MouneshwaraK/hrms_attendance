@@ -90,95 +90,6 @@ class _LoginUIState extends State<LoginUI> {
     return leftEye != null && rightEye != null && noseBase != null;
   }
 
-  void _refreshScreen() {
-    setState(() {
-      _capturedImage = null;
-      isFaceDetected = false;
-      isImageCaptured = false; // Reset the flag on refresh
-    });
-    initializeCameraFun();
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    flutterTts.stop(); // Stop any ongoing TTS
-    super.dispose();
-  }
-
-  void uploadImage(File image) async {
-    try {
-      // Read the image file and decode it
-      img.Image originalImage = img.decodeImage(await image.readAsBytes())!;
-
-      // Resize the image to width 800 while maintaining aspect ratio
-      img.Image resizedImage = img.copyResize(originalImage, width: 800);
-
-      // Compress and save the resized image to a temporary file
-      File compressedFile = File(image.path)
-        ..writeAsBytesSync(img.encodeJpg(resizedImage));
-
-      // Read compressed image bytes and convert to Base64
-      List<int> compressedImageBytes = await compressedFile.readAsBytes();
-      String base64Image = base64Encode(compressedImageBytes);
-
-      // Prepend the Base64 prefix
-      String prefixedBase64Image = "data:image/jpeg;base64,$base64Image";
-
-      Map<String, dynamic> payload = {
-        "image": prefixedBase64Image, // Add the Base64 string directly
-      };
-
-// Call the login API
-      Response response = await ApiService().validateUser(
-        url: "http://34.228.44.206:8000/face_recognition/",
-        reqObj: jsonEncode(payload),
-        device_status: "in", // Provide the required device_status argument
-      );
-      print(image.path);
-      if (response.statusCode == 200) {
-        print('User validated successfully!');
-        Map<String, dynamic> responseData = response.data;
-        String name = responseData['recognized_face_data']['name'];
-        String message = "Thank you, $name!";
-        await flutterTts.speak(message);
-        _showInvalidUserUI();
-
-        // Reset the screen for the next user
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            _refreshScreen();
-          }
-        });
-        setState(() {
-          isFaceDetected = true;
-        });
-      } else {
-        print("Error: ${response.statusCode} - ${response.statusMessage}");
-        print("Response body: ${response.data}");
-        await flutterTts.speak("Invalid User Please try again.");
-        _showInvalidUserUI();
-      }
-    } on DioException catch (e) {
-      print("Dio error occurred: ${e.message}");
-      await flutterTts.speak("Invalid User Please try again.");
-      _showInvalidUserUI();
-    } catch (e) {
-      print("Unexpected error: $e");
-      await flutterTts.speak("Invalid User Please try again.");
-      _showInvalidUserUI();
-    }
-  }
-
-  void _showInvalidUserUI() {
-    setState(() {
-      _capturedImage = null;
-      isFaceDetected = false;
-      isImageCaptured = false;
-      _refreshScreen();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -305,6 +216,94 @@ class _LoginUIState extends State<LoginUI> {
           updateAction();
         });
       }
+    });
+  }
+
+  void _refreshScreen() {
+    setState(() {
+      _capturedImage = null;
+      isFaceDetected = false;
+      isImageCaptured = false; // Reset the flag on refresh
+    });
+    initializeCameraFun();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    flutterTts.stop(); // Stop any ongoing TTS
+    super.dispose();
+  }
+
+  void uploadImage(File image) async {
+    try {
+      // Read the image file and decode it
+      img.Image originalImage = img.decodeImage(await image.readAsBytes())!;
+
+      // Resize the image to width 800 while maintaining aspect ratio
+      img.Image resizedImage = img.copyResize(originalImage, width: 800);
+
+      // Compress and save the resized image to a temporary file
+      File compressedFile = File(image.path)
+        ..writeAsBytesSync(img.encodeJpg(resizedImage));
+
+      // Read compressed image bytes and convert to Base64
+      List<int> compressedImageBytes = await compressedFile.readAsBytes();
+      String base64Image = base64Encode(compressedImageBytes);
+
+      // Prepend the Base64 prefix
+      String prefixedBase64Image = "data:image/jpeg;base64,$base64Image";
+
+      Map<String, dynamic> payload = {
+        "image": prefixedBase64Image, // Add the Base64 string directly
+      };
+
+// Call the login API
+      Response response = await ApiService().validateUser(
+        url: "http://34.228.44.206:8000/face_recognition/",
+        reqObj: jsonEncode(payload),
+        device_status: "in", // Provide the required device_status argument
+      );
+      print(image.path);
+      if (response.statusCode == 200) {
+        print('User validated successfully!');
+        Map<String, dynamic> responseData = response.data;
+        String name = responseData['recognized_face_data']['name'];
+        String message = "Thank you, $name!";
+        await flutterTts.speak(message);
+
+        // Reset the screen for the next user
+        Future.delayed(const Duration(seconds: 2), () {
+          if (mounted) {
+            _refreshScreen();
+          }
+        });
+        setState(() {
+          isFaceDetected = true;
+        });
+      } else {
+        print("Error: ${response.statusCode} - ${response.statusMessage}");
+        print("Response body: ${response.data}");
+        await flutterTts.speak("Invalid User Please try again.");
+        _showInvalidUserUI();
+      }
+    } on DioException catch (e) {
+      print("Dio error occurred: ${e.message}");
+      await flutterTts.speak("Invalid User Please try again.");
+      _showInvalidUserUI();
+    } catch (e) {
+      print("Unexpected error: $e");
+      await flutterTts.speak("Invalid User Please try again.");
+      _showInvalidUserUI();
+    }
+  }
+
+  void _showInvalidUserUI() {
+    setState(() {
+      _capturedImage = null;
+      isFaceDetected = false;
+      isImageCaptured = false;
+      _refreshScreen();
     });
   }
 
