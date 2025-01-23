@@ -169,8 +169,8 @@ class _LoginUIState extends State<LoginUI> {
                 debounceTimer
                     ?.cancel(); // Cancel timer when no face is detected
                 if (!hasSpoken) {
-                  flutterTts.speak(
-                      "No face detected. Place your face in the camera.");
+                  // flutterTts.speak(
+                  //     "No face detected. Place your face in the camera.");
                   updateStateSafely(() {
                     hasSpoken = true;
                   });
@@ -178,7 +178,7 @@ class _LoginUIState extends State<LoginUI> {
                 return _message('No face detected');
               } else if (!face.wellPositioned) {
                 if (!hasSpoken) {
-                  flutterTts.speak("Center your face in the square");
+                  // flutterTts.speak("Center your face in the square");
                   // Set a cooldown timer to avoid repeated actions
                   debounceTimer?.cancel();
                   debounceTimer = Timer(Duration(seconds: 2), () {
@@ -262,14 +262,18 @@ class _LoginUIState extends State<LoginUI> {
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
-        device_status: "in", // Provide the required device_status argument
+        device_status: "out", // Provide the required device_status argument
       );
       print(image.path);
       if (response.statusCode == 200) {
         print('User validated successfully!');
         Map<String, dynamic> responseData = response.data;
         String name = responseData['recognized_face_data']['name'];
-        String message = "Thank you, $name!";
+        // in
+        // String message = "$name! clocked in. Thank you!! ";
+        // out  You're now exited, $name. See you next time!
+        String message = "$name! clocked out. Thank you!! ";
+
         await flutterTts.speak(message);
 
         // Reset the screen for the next user
