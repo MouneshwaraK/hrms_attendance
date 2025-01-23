@@ -78,11 +78,12 @@ class _LandingScreenState extends State<LandingScreen> {
                         ? "Face Recoginition Attendance System CheckIn"
                         : "Face Recoginition Attendance System CheckOut",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Image.asset(
                     AssetImages.landingScreen,
-                    height: constraints.maxWidth * (isTablet ? 0.7 : 0.2),
+                    height: constraints.maxWidth * (isTablet ? 0.5 : 0.2),
                   ),
                   Container(
                     width: constraints.maxWidth * (isTablet ? 0.85 : 0.85),
@@ -132,7 +133,7 @@ class _LandingScreenState extends State<LandingScreen> {
                             );
                           },
                           child: const Text(
-                            "Resgistration",
+                            "Registration",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w600),

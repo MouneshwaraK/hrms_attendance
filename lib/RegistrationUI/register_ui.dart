@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
+import 'package:hrvms_attendence/Utils/UpperCaseTextFormatter.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as img;
@@ -113,14 +115,22 @@ class _RegistrationUIState extends State<RegistrationUI> {
                   ),
                 ),
                 const SizedBox(height: 10),
+                // ... inside your Widget build method ...
                 TextFormField(
                   controller: empCodeController,
                   validator: (value) {
                     if (value!.trim().isEmpty) {
                       return "Enter Employee Code";
                     }
+                    if (!RegExp(r'^[A-Z0-9]+$').hasMatch(value)) {
+                      return "Only uppercase letters and numbers are allowed";
+                    }
                     return null;
                   },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                    UpperCaseTextFormatter(),
+                  ],
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.person_pin_outlined),
                     hintText: "Employee Code",
