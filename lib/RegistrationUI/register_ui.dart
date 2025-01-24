@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/UpperCaseTextFormatter.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
@@ -26,6 +27,8 @@ class _RegistrationUIState extends State<RegistrationUI> {
   File? file;
   FlutterTts flutterTts = FlutterTts();
   bool isLoading = false;
+  final ImagePicker _picker =
+      ImagePicker(); // Declare and initialize the ImagePicker
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +56,33 @@ class _RegistrationUIState extends State<RegistrationUI> {
                   'EMPLOYEE REGISTRATION',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-
+                // GestureDetector(
+                //   onTap: () => _clickImage(context),
+                //   child: Container(
+                //     margin: const EdgeInsets.all(10),
+                //     width: screenWidth * 0.3,
+                //     height: screenWidth * 0.3,
+                //     decoration: BoxDecoration(
+                //       shape: BoxShape.circle,
+                //       color: Colors.black12,
+                //       border: Border.all(color: Colors.black26, width: 1.5),
+                //     ),
+                //     child: _image == null
+                //         ? const Icon(
+                //             Icons.person,
+                //             size: 70,
+                //             color: Colors.white,
+                //           )
+                //         : ClipOval(
+                //             child: Image.file(
+                //               File(_image!.path),
+                //               fit: BoxFit.cover,
+                //               width: screenWidth * 0.3,
+                //               height: screenWidth * 0.3,
+                //             ),
+                //           ),
+                //   ),
+                // ),
                 Column(
                   children: [
                     GestureDetector(
@@ -67,30 +96,54 @@ class _RegistrationUIState extends State<RegistrationUI> {
                           color: Colors.black12,
                           border: Border.all(color: Colors.black26, width: 1.5),
                         ),
-                        child: _image == null
-                            ? const Icon(
-                                Icons.person,
-                                size: 70,
-                                color: Colors.white,
-                              )
-                            : ClipOval(
-                                child: Image.file(
-                                  File(_image!.path),
-                                  fit: BoxFit.cover,
-                                  width: screenWidth * 0.3,
-                                  height: screenWidth * 0.3,
+                        child: Stack(
+                          alignment: Alignment.center, // Center the image/icon
+                          children: [
+                            // Show the person icon or the selected image
+                            ClipOval(
+                              child: _image == null
+                                  ? const Icon(
+                                      Icons.person,
+                                      size: 70,
+                                      color: Colors.white,
+                                    )
+                                  : Image.file(
+                                      File(_image!.path),
+                                      fit: BoxFit
+                                          .cover, // Ensure the image fills the circle
+                                      width: screenWidth * 0.3,
+                                      height: screenWidth * 0.3,
+                                    ),
+                            ),
+                            // Add "+" icon in the top-right corner
+                            Positioned(
+                              top: 14,
+                              right: 14,
+                              child: Container(
+                                padding: const EdgeInsets.all(5),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.5),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 20,
+                                  color: Colors.white,
                                 ),
                               ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(
                         height:
                             10), // Add spacing between the image and the text
                     const Text(
-                      "Please select a photo",
+                      "Please upload a photo",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey,
+                        color: Colors.black,
                       ),
                     ),
                   ],
@@ -101,6 +154,12 @@ class _RegistrationUIState extends State<RegistrationUI> {
                   validator: (value) {
                     if (value!.trim().isEmpty) {
                       return "Enter First Name";
+                    }
+                    // Regular expression to match only letters and spaces
+                    RegExp regExp = RegExp(r'[a-zA-Z\s]+$');
+
+                    if (!regExp.hasMatch(value)) {
+                      return "Please enter only letters and spaces";
                     }
                     return null;
                   },
@@ -193,27 +252,68 @@ class _RegistrationUIState extends State<RegistrationUI> {
     );
   }
 
+  // Capture image using front camera and detect faces
   Future<void> _clickImage(BuildContext context) async {
-    final picker = ImagePicker();
-
     // Capture an image using the front camera
-    final pickedFile = await picker.pickImage(
+    final pickedFile = await _picker.pickImage(
       source: ImageSource.camera,
       preferredCameraDevice: CameraDevice.front, // Use the front camera
       imageQuality: 70, // Compress the image to reduce size
     );
 
-    // If an image is selected, update the state
+    // If an image is selected, proceed to face detection
     if (pickedFile != null) {
       setState(() {
         _image = pickedFile;
       });
+
+      // Perform face detection
+      _detectFaces(File(_image!.path));
     } else {
       // Optional: Handle the case where no image is selected
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: const Text('No image captured')),
       );
     }
+  }
+
+  // Perform face detection on the image
+  Future<void> _detectFaces(File imageFile) async {
+    // Initialize the face detector
+    final faceDetector = GoogleMlKit.vision.faceDetector(
+      FaceDetectorOptions(
+        enableContours: true,
+        enableClassification: true,
+      ),
+    );
+
+    try {
+      final inputImage = InputImage.fromFile(imageFile);
+      final faces = await faceDetector.processImage(inputImage);
+
+      if (faces.isEmpty) {
+        setState(() {
+          flutterTts.speak('No faces detected.');
+        });
+      } else if (faces.length > 1) {
+        setState(() {
+          flutterTts.speak('More than one face detected!');
+        });
+      } else {
+        setState(() {
+          flutterTts.speak('Face detected successfully.');
+        });
+      }
+    } catch (e) {
+      setState(() {
+        flutterTts.speak('Error detecting faces: $e');
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   onSubmit() async {
