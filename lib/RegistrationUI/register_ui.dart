@@ -53,32 +53,47 @@ class _RegistrationUIState extends State<RegistrationUI> {
                   'EMPLOYEE REGISTRATION',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                GestureDetector(
-                  onTap: () => _clickImage(context),
-                  child: Container(
-                    margin: const EdgeInsets.all(10),
-                    width: screenWidth * 0.3,
-                    height: screenWidth * 0.3,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black12,
-                      border: Border.all(color: Colors.black26, width: 1.5),
+
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () => _clickImage(context),
+                      child: Container(
+                        margin: const EdgeInsets.all(10),
+                        width: screenWidth * 0.3,
+                        height: screenWidth * 0.3,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black12,
+                          border: Border.all(color: Colors.black26, width: 1.5),
+                        ),
+                        child: _image == null
+                            ? const Icon(
+                                Icons.person,
+                                size: 70,
+                                color: Colors.white,
+                              )
+                            : ClipOval(
+                                child: Image.file(
+                                  File(_image!.path),
+                                  fit: BoxFit.cover,
+                                  width: screenWidth * 0.3,
+                                  height: screenWidth * 0.3,
+                                ),
+                              ),
+                      ),
                     ),
-                    child: _image == null
-                        ? const Icon(
-                            Icons.person,
-                            size: 70,
-                            color: Colors.white,
-                          )
-                        : ClipOval(
-                            child: Image.file(
-                              File(_image!.path),
-                              fit: BoxFit.cover,
-                              width: screenWidth * 0.3,
-                              height: screenWidth * 0.3,
-                            ),
-                          ),
-                  ),
+                    const SizedBox(
+                        height:
+                            10), // Add spacing between the image and the text
+                    const Text(
+                      "Please select a photo",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
@@ -255,27 +270,40 @@ class _RegistrationUIState extends State<RegistrationUI> {
             throw Exception("Unexpected response format");
           }
 
-          // Safely extract the 'info' key
-          String successInfo =
-              responseBody['info']?.toString() ?? "Unknown success message";
+          // Check the 'status' field
+          String status = responseBody['Status']?.toString() ?? "unknown";
+          String message = responseBody['Message']?.toString() ?? "";
+          String errorMessage = responseBody['errorMessage']?.toString() ?? "";
 
-          // Print and use the success info
-          print("Success: $successInfo");
-          flutterTts.speak("Registration successfully Done.");
-          clearForm();
-          Navigator.pop(context);
+          if (status == "success") {
+            // Handle success case
+            print("Success: $message");
+            flutterTts.speak(message);
+            clearForm();
+            Navigator.pop(context);
+          } else if (status == "error") {
+            // Handle error case
+            print("Error: $errorMessage");
+            if (errorMessage.isNotEmpty) {
+              flutterTts.speak(errorMessage); // Speak the error message
+            } else {
+              flutterTts.speak("An unexpected error occurred."); // Fallback
+            }
+            setState(() {
+              isLoading = false;
+            });
+          } else {
+            throw Exception("Unexpected status value");
+          }
         } catch (e) {
           // Log or handle exceptions
           print("An error occurred while parsing the response: $e");
           flutterTts.speak("An unexpected error occurred.");
         }
       } else {
-        // Handle other response codes
-        flutterTts.speak("Sorry, something went wrong. Please try again.");
-        print("Error: ${response.statusCode} - ${response.statusMessage}");
-        setState(() {
-          isLoading = false;
-        });
+        // Handle non-200/201 status codes
+        print("HTTP error: ${response.statusCode}");
+        flutterTts.speak("Failed to connect to the server. Please try again.");
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

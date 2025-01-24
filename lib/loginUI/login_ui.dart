@@ -262,7 +262,7 @@ class _LoginUIState extends State<LoginUI> {
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
-        device_status: "in", // Provide the required device_status argument
+        device_status: "out", // Provide the required device_status argument
       );
       print(image.path);
       if (response.statusCode == 200) {
@@ -270,9 +270,9 @@ class _LoginUIState extends State<LoginUI> {
         Map<String, dynamic> responseData = response.data;
         String name = responseData['recognized_face_data']['name'];
         // in
-        String message = "Hey!!, $name! checked in";
+        // String message = "Hey!!, $name! checked in";
         // out  You're now exited, $name. See you next time!
-        // String message = "Hey,$name! checkedout.";
+        String message = "Hey,$name! checkedout.";
         await flutterTts.speak(message);
 
         // Reset the screen for the next user
