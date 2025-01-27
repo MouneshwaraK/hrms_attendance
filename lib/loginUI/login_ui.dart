@@ -39,11 +39,28 @@ class _LoginUIState extends State<LoginUI> {
       autoCapture: false, // Disable auto-capture to validate face first
       defaultCameraLens: CameraLens.front,
       performanceMode: FaceDetectorMode.accurate,
-      onCapture: (File? image) {
+      onCapture: (File? image) async {
         setState(() {
           _capturedImage = image;
           isImageCaptured = false; // Reset the flag after capture
         });
+
+        // Initialize Face Detector
+        final faceDetector = FaceDetector(
+          options: FaceDetectorOptions(
+            enableContours: true,
+            enableClassification: true,
+          ),
+        );
+
+// Detect faces
+        final inputImage = InputImage.fromFilePath(image!.path);
+        final List<Face> faces = await faceDetector.processImage(inputImage);
+
+        if (faces.length > 1) {
+          flutterTts.speak("More than one face detected.");
+          print('More than one face detected!');
+        }
         if (image != null) {
           uploadImage(image);
         }
@@ -162,7 +179,7 @@ class _LoginUIState extends State<LoginUI> {
             controller: controller,
             showFlashControl: false,
             showCameraLensControl: false,
-            showCaptureControl: true,
+            showCaptureControl: false,
             indicatorShape: IndicatorShape.defaultShape,
             messageBuilder: (context, face) {
               if (face == null) {
@@ -262,7 +279,7 @@ class _LoginUIState extends State<LoginUI> {
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
-        device_status: "out", // Provide the required device_status argument
+        device_status: "in", // Provide the required device_status argument
       );
       print(image.path);
       if (response.statusCode == 200) {
@@ -270,9 +287,9 @@ class _LoginUIState extends State<LoginUI> {
         Map<String, dynamic> responseData = response.data;
         String name = responseData['recognized_face_data']['name'];
         // in
-        // String message = "Hey!!, $name! checked in";
+        String message = "Hey!!, $name! checked in";
         // out  You're now exited, $name. See you next time!
-        String message = "Hey,$name! checkedout.";
+        // String message = "Hey,$name! checkedout.";
         await flutterTts.speak(message);
 
         // Reset the screen for the next user

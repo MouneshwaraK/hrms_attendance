@@ -260,7 +260,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
       preferredCameraDevice: CameraDevice.front, // Use the front camera
       imageQuality: 70, // Compress the image to reduce size
     );
-
+    print(pickedFile);
     // If an image is selected, proceed to face detection
     if (pickedFile != null) {
       setState(() {
@@ -280,34 +280,36 @@ class _RegistrationUIState extends State<RegistrationUI> {
   // Perform face detection on the image
   Future<void> _detectFaces(File imageFile) async {
     // Initialize the face detector
-    final faceDetector = GoogleMlKit.vision.faceDetector(
-      FaceDetectorOptions(
+    final faceDetector = FaceDetector(
+      options: FaceDetectorOptions(
         enableContours: true,
         enableClassification: true,
       ),
     );
 
     try {
-      final inputImage = InputImage.fromFile(imageFile);
+      // Convert the image file to InputImage
+      final inputImage = InputImage.fromFilePath(imageFile.path);
+
+      // Perform face detection
       final faces = await faceDetector.processImage(inputImage);
 
       if (faces.isEmpty) {
-        setState(() {
-          flutterTts.speak('No faces detected.');
-        });
+        print('No faces detected.');
       } else if (faces.length > 1) {
+        flutterTts.speak("More than one face detected!");
         setState(() {
-          flutterTts.speak('More than one face detected!');
+          _image = null;
         });
+        print('More than one face detected!');
       } else {
-        setState(() {
-          flutterTts.speak('Face detected successfully.');
-        });
+        print('Face detected successfully.');
       }
     } catch (e) {
-      setState(() {
-        flutterTts.speak('Error detecting faces: $e');
-      });
+      print('Error detecting faces: $e');
+    } finally {
+      // Close the face detector to release resources
+      faceDetector.close();
     }
   }
 
