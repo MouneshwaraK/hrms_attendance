@@ -32,35 +32,35 @@ class _LandingScreenState extends State<LandingScreen> {
       appBar: AppBar(
         toolbarHeight: 80,
         backgroundColor: Colors.white,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 20),
-            child: Column(
-              children: [
-                Switch(
-                  value: isCheckInEnabled,
-                  onChanged: isSwitchDisabled
-                      ? null
-                      : (value) {
-                          setState(() {
-                            isCheckInEnabled = value;
-                            if (isCheckInEnabled) {
-                              checkVal =
-                                  prefs.setString('check', 'in').toString();
-                            } else {
-                              checkVal =
-                                  prefs.setString('check', 'out').toString();
-                              isSwitchDisabled =
-                                  true; // Disable switch after toggling to "out"
-                            }
-                          });
-                        },
-                ),
-                Text(isCheckInEnabled == true ? "Check In" : "Check Out")
-              ],
-            ),
-          ),
-        ],
+        // actions: [
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 20),
+        //     child: Column(
+        //       children: [
+        //         Switch(
+        //           value: isCheckInEnabled,
+        //           onChanged: isSwitchDisabled
+        //               ? null
+        //               : (value) {
+        //                   setState(() {
+        //                     isCheckInEnabled = value;
+        //                     if (isCheckInEnabled) {
+        //                       checkVal =
+        //                           prefs.setString('check', 'in').toString();
+        //                     } else {
+        //                       checkVal =
+        //                           prefs.setString('check', 'out').toString();
+        //                       isSwitchDisabled =
+        //                           true; // Disable switch after toggling to "out"
+        //                     }
+        //                   });
+        //                 },
+        //         ),
+        //         Text(isCheckInEnabled == true ? "Check In" : "Check Out")
+        //       ],
+        //     ),
+        //   ),
+        // ],
       ),
       body: SingleChildScrollView(
         child: LayoutBuilder(
@@ -73,13 +73,10 @@ class _LandingScreenState extends State<LandingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    isCheckInEnabled == true
-                        ? "Face Recoginition Attendance System CheckIn"
-                        : "Face Recoginition Attendance System CheckOut",
+                  const Text(
+                    "Face Recoginition Attendance System CheckIn",
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
                   Image.asset(
                     AssetImages.landingScreen,

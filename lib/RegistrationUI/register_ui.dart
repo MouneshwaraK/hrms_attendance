@@ -163,6 +163,10 @@ class _RegistrationUIState extends State<RegistrationUI> {
                     }
                     return null;
                   },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')),
+                    UpperCaseTextFormatter(),
+                  ],
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.person_outline),
                     hintText: "First Name",
@@ -180,6 +184,10 @@ class _RegistrationUIState extends State<RegistrationUI> {
                     }
                     return null;
                   },
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')),
+                    UpperCaseTextFormatter(),
+                  ],
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.person_outline),
                     hintText: "Last Name",
@@ -282,8 +290,9 @@ class _RegistrationUIState extends State<RegistrationUI> {
     // Initialize the face detector
     final faceDetector = FaceDetector(
       options: FaceDetectorOptions(
-        enableContours: true,
-        enableClassification: true,
+        enableContours: true, // Enables detection of facial contours
+        enableClassification:
+            true, // Enables classification of faces (e.g., smiling, eyes open)
       ),
     );
 
@@ -295,18 +304,70 @@ class _RegistrationUIState extends State<RegistrationUI> {
       final faces = await faceDetector.processImage(inputImage);
 
       if (faces.isEmpty) {
+        // Case 1: No face detected
         print('No faces detected.');
-      } else if (faces.length > 1) {
-        flutterTts.speak("More than one face detected!");
         setState(() {
           _image = null;
         });
+        flutterTts
+            .speak("No face detected. Please ensure your face is visible.");
+      } else if (faces.length > 1) {
+        // Case 2: Multiple faces detected
+        setState(() {
+          _image = null;
+        });
+        flutterTts.speak("More than one face detected!");
         print('More than one face detected!');
       } else {
-        print('Face detected successfully.');
+        // Case 3: Single face detected
+        final face = faces.first;
+
+        // Check if the face is obstructed or partially visible
+        if (face.headEulerAngleY!.abs() > 30 ||
+            face.headEulerAngleZ!.abs() > 30) {
+          // Large head rotation (looking away from the camera)
+          flutterTts.speak("Please face the camera directly.");
+          setState(() {
+            _image = null;
+          });
+          print('Face is not facing the camera directly.');
+        } else if (face.boundingBox.width < 100 ||
+            face.boundingBox.height < 100) {
+          // Face is too small (e.g., far from the camera)
+          flutterTts.speak("Move closer to the camera.");
+          setState(() {
+            _image = null;
+          });
+          print('Face is too small.');
+        }
+        // else if (face.smilingProbability != null &&
+        //     face.smilingProbability! < 0.5) {
+        //   // Face is not smiling (optional condition for classification-enabled detectors)
+        //   flutterTts.speak("Please smile for the camera.");
+        //   print('Face is not smiling.');
+        // }
+        else if (face.leftEyeOpenProbability != null &&
+            face.leftEyeOpenProbability! < 0.5 &&
+            face.rightEyeOpenProbability != null &&
+            face.rightEyeOpenProbability! < 0.5) {
+          // Eyes are closed
+          flutterTts.speak("Please open your eyes.");
+          setState(() {
+            _image = null;
+          });
+          print('Eyes are closed.');
+        } else {
+          // Face is properly positioned and unobstructed
+          print('Face detected successfully and is well-positioned.');
+          flutterTts.speak("Face detected successfully.");
+        }
       }
     } catch (e) {
       print('Error detecting faces: $e');
+      flutterTts.speak("An error occurred while detecting your face.");
+      setState(() {
+        _image = null;
+      });
     } finally {
       // Close the face detector to release resources
       faceDetector.close();
@@ -323,6 +384,8 @@ class _RegistrationUIState extends State<RegistrationUI> {
       isLoading = true;
     });
     if (_image == null) {
+      flutterTts.speak('Please upload an image to proceed.');
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please upload an image to proceed.'),
