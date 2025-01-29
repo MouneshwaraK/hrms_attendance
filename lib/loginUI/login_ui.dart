@@ -291,6 +291,15 @@ class _LoginUIState extends State<LoginUI> {
         } else {
           if (responseData['recognized_face_data']['name'] == null) {
             await flutterTts.speak("User not registered");
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                _refreshScreen();
+              }
+            });
+
+            setState(() {
+              isFaceDetected = true;
+            });
           } else {
             print('User validated successfully!');
             String name = responseData['recognized_face_data']['name'];
