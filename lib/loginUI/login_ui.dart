@@ -264,26 +264,21 @@ class _LoginUIState extends State<LoginUI> {
       String prefixedBase64Image = "data:image/jpeg;base64,$base64Image";
 
       Map<String, dynamic> payload = {
-        "image": prefixedBase64Image, // Add the Base64 string directly
+        "image": prefixedBase64Image,
       };
-
-      // Call the login API
       Response response = await ApiService().validateUser(
         url: "http://34.228.44.206:8000/face_recognition/",
         reqObj: jsonEncode(payload),
-        device_status: "in", // Provide the required device_status argument
+        device_status: "out",
       );
       print(image.path);
       if (response.statusCode == 200) {
         Map<String, dynamic> responseData = response.data;
 
         if (responseData['Status'] == 'error') {
-          // Handle the error case
           String errorMessage = responseData['errorMessage'];
           print('Error: $errorMessage');
           await flutterTts.speak(errorMessage);
-
-          // Optionally reset the screen or perform any additional actions
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
               _refreshScreen();
@@ -291,31 +286,30 @@ class _LoginUIState extends State<LoginUI> {
           });
 
           setState(() {
-            isFaceDetected = false; // Indicate no valid face detected
+            isFaceDetected = false;
           });
         } else {
-          // Handle the success case
-          print('User validated successfully!');
-          String name = responseData['recognized_face_data']['name'];
-          String message = "Hey!!, $name! checked in";
-          // String message = "Hey, $name! checked out.";
-          await flutterTts.speak(message);
+          if (responseData['recognized_face_data']['name'] == null) {
+            await flutterTts.speak("User not registered");
+          } else {
+            print('User validated successfully!');
+            String name = responseData['recognized_face_data']['name'];
+            String message = "Hey!!, $name! clock out";
+            await flutterTts.speak(message);
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                _refreshScreen();
+              }
+            });
 
-          // Reset the screen for the next user
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              _refreshScreen();
-            }
-          });
-
-          setState(() {
-            isFaceDetected = true;
-          });
+            setState(() {
+              isFaceDetected = true;
+            });
+          }
         }
       }
     } on DioException catch (e) {
       print("Dio error occurred: ${e.message}");
-      // await flutterTts.speak("Invalid User Please try again.");
       _showInvalidUserUI();
     }
   }

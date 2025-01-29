@@ -74,7 +74,7 @@ class _LandingScreenState extends State<LandingScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Face Recoginition Attendance System CheckIn",
+                    "Face Recoginition Attendance System Checkout",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
@@ -109,33 +109,33 @@ class _LandingScreenState extends State<LandingScreen> {
                           height:
                               constraints.maxWidth * (isTablet ? 0.15 : 0.2),
                         ),
-                        SizedBox(height: isTablet ? 20 : 10),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(5),
-                            ),
-                            foregroundColor: Colors.black,
-                            backgroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(
-                              horizontal: isTablet ? 50 : 30,
-                              vertical: isTablet ? 20 : 15,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const RegistrationUI()),
-                            );
-                          },
-                          child: const Text(
-                            "Registration",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.w600),
-                          ),
-                        ),
+                        // SizedBox(height: isTablet ? 20 : 10),
+                        // ElevatedButton(
+                        //   style: ElevatedButton.styleFrom(
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(5),
+                        //     ),
+                        //     foregroundColor: Colors.black,
+                        //     backgroundColor: Colors.white,
+                        //     padding: EdgeInsets.symmetric(
+                        //       horizontal: isTablet ? 50 : 30,
+                        //       vertical: isTablet ? 20 : 15,
+                        //     ),
+                        //   ),
+                        //   onPressed: () {
+                        //     Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => const RegistrationUI()),
+                        //     );
+                        //   },
+                        //   child: const Text(
+                        //     "Registration",
+                        //     textAlign: TextAlign.center,
+                        //     style: TextStyle(
+                        //         fontSize: 20, fontWeight: FontWeight.w600),
+                        //   ),
+                        // ),
                         SizedBox(height: isTablet ? 20 : 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -157,7 +157,7 @@ class _LandingScreenState extends State<LandingScreen> {
                             );
                           },
                           child: const Text(
-                            "Login",
+                            "Logout",
                             textAlign: TextAlign.center,
                             style: TextStyle(
                                 fontSize: 20, fontWeight: FontWeight.w600),
