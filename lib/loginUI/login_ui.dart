@@ -210,13 +210,11 @@ class _LoginUIState extends State<LoginUI> {
 
                 return _message('Center your face in the square');
               }
-
               // Reset the flag when the face is well-positioned
               debounceTimer?.cancel();
               updateStateSafely(() {
                 hasSpoken = false;
               });
-
               return const SizedBox.shrink();
             },
           );
