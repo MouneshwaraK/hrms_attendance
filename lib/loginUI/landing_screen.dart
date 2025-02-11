@@ -1,9 +1,12 @@
+import 'dart:async';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
 import 'package:hrvms_attendence/loginUI/login_ui.dart';
-import 'package:hrvms_attendence/registrationUI/register_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart'; // For formatting date
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -17,13 +20,64 @@ class _LandingScreenState extends State<LandingScreen> {
   String checkVal = '';
   late SharedPreferences prefs;
   bool isSwitchDisabled = false;
+  List<String> quotes = [
+    "The secret of getting ahead is getting started. – Mark Twain",
+    "Success is not final, failure is not fatal: it is the courage to continue that counts. – Winston Churchill",
+    "Believe you can and you're halfway there. – Theodore Roosevelt",
+    "Don't watch the clock; do what it does. Keep going. – Sam Levenson",
+    "Act as if what you do makes a difference. It does. – William James",
+    "Focus on being productive instead of busy. – Tim Ferriss",
+    "Do what you can, with what you have, where you are. – Theodore Roosevelt",
+    "Efficiency is doing things right; effectiveness is doing the right things. – Peter Drucker",
+    "If you spend too much time thinking about a thing, you’ll never get it done. – Bruce Lee",
+    "Small deeds done are better than great deeds planned. – Peter Marshall",
+    "Creativity is intelligence having fun. – Albert Einstein",
+    "Do one thing every day that scares you. – Eleanor Roosevelt",
+    "Innovation distinguishes between a leader and a follower. – Steve Jobs",
+    "An idea that is not dangerous is unworthy of being called an idea at all. – Oscar Wilde",
+    "Simplicity is the ultimate sophistication. – Leonardo da Vinci"
+  ];
+  List<Color> colors = [
+    Colors.red,
+    Colors.blue,
+    Colors.green,
+    Colors.purple,
+    Colors.orange,
+    Colors.pink,
+    Colors.teal
+  ];
+  late Color textColor;
+  String currentDate = DateFormat('EEEE, MMMM d, yyyy').format(DateTime.now());
+  String currentQuote = "";
+  late Timer _timer;
 
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
       prefs = await SharedPreferences.getInstance();
     });
+    _changeQuote();
+    _timer = Timer.periodic(Duration(hours: 1), (timer) {
+      _changeQuote();
+    });
+
+    textColor = colors[0];
+
+    // Change text color every second
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        textColor = (colors..shuffle()).first;
+      });
+    });
+
     super.initState();
+  }
+
+  void _changeQuote() {
+    final random = Random();
+    setState(() {
+      currentQuote = quotes[random.nextInt(quotes.length)];
+    });
   }
 
   @override
@@ -80,8 +134,57 @@ class _LandingScreenState extends State<LandingScreen> {
                   ),
                   Image.asset(
                     AssetImages.landingScreen,
-                    height: constraints.maxWidth * (isTablet ? 0.5 : 0.2),
+                    height: constraints.maxWidth * (isTablet ? 0.3 : 0.2),
                   ),
+                  Center(
+                    child: Text(
+                      "📅 $currentDate\n💡 Quote of the Day",
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.bold, // Makes text bold
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            currentQuote,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 18, fontStyle: FontStyle.italic),
+                          ),
+                          const SizedBox(height: 20),
+                          // const Text(
+                          //   "Quote changes every 5 seconds...",
+                          //   style: TextStyle(fontSize: 14, color: Colors.grey),
+                          // ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Center(
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => const LinearGradient(
+                        colors: [Colors.pink, Colors.orange, Colors.yellow],
+                      ).createShader(bounds),
+                      child: Text(
+                        "🎉 Happy Birthday Mouneshwara Kalal 🎂",
+                        textAlign: TextAlign.center,
+                        style: GoogleFonts.pacifico(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
+                          color: textColor, // Changing colors dynamically
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Container(
                     width: constraints.maxWidth * (isTablet ? 0.85 : 0.85),
                     padding: EdgeInsets.all(isTablet ? 40 : 20),
