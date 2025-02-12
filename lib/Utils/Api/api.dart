@@ -5,7 +5,8 @@ class API {
   final Dio _dio = Dio();
   API() {
     ///****************** Testing Base URL  *******************/
-    _dio.options.baseUrl = "http://34.228.44.206:8000/";
+    ///http://34.235.114.150:8000/docs
+    _dio.options.baseUrl = "http://34.235.114.150:8000/";
 
     _dio.interceptors.add(PrettyDioLogger());
   }
