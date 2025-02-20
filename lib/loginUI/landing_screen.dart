@@ -4,6 +4,7 @@ import 'package:hrvms_attendence/Utils/images.dart';
 import 'package:hrvms_attendence/loginUI/login_ui.dart';
 import 'package:hrvms_attendence/registrationUI/register_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -136,6 +137,20 @@ class _LandingScreenState extends State<LandingScreen> {
                                 fontSize: 20, fontWeight: FontWeight.w600),
                           ),
                         ),
+                        // Center(
+                        //   child: ElevatedButton(
+                        //     onPressed: _makePhoneCall,
+                        //     child: Text("📞 Call Now"),
+                        //     style: ElevatedButton.styleFrom(
+                        //       backgroundColor: Colors.green,
+                        //       foregroundColor: Colors.white,
+                        //       padding: EdgeInsets.symmetric(
+                        //           horizontal: 20, vertical: 12),
+                        //       textStyle: TextStyle(
+                        //           fontSize: 18, fontWeight: FontWeight.bold),
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(height: isTablet ? 20 : 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
@@ -173,5 +188,14 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
       ),
     );
+  }
+
+  void _makePhoneCall() async {
+    const phoneNumber = 'tel:9591081220'; // Replace with any number
+    if (await canLaunchUrl(Uri.parse(phoneNumber))) {
+      await launchUrl(Uri.parse(phoneNumber));
+    } else {
+      throw 'Could not launch $phoneNumber';
+    }
   }
 }
