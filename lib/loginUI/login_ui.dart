@@ -264,8 +264,9 @@ class _LoginUIState extends State<LoginUI> {
       Map<String, dynamic> payload = {
         "image": prefixedBase64Image,
       };
+
       Response response = await ApiService().validateUser(
-        url: "http://34.228.44.206:8000/face_recognition/",
+        url: "http://34.229.118.216:8000/face_recognition/",
         reqObj: jsonEncode(payload),
         device_status: "out",
       );
