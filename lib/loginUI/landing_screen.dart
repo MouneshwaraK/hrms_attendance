@@ -137,20 +137,6 @@ class _LandingScreenState extends State<LandingScreen> {
                                 fontSize: 20, fontWeight: FontWeight.w600),
                           ),
                         ),
-                        // Center(
-                        //   child: ElevatedButton(
-                        //     onPressed: _makePhoneCall,
-                        //     child: Text("📞 Call Now"),
-                        //     style: ElevatedButton.styleFrom(
-                        //       backgroundColor: Colors.green,
-                        //       foregroundColor: Colors.white,
-                        //       padding: EdgeInsets.symmetric(
-                        //           horizontal: 20, vertical: 12),
-                        //       textStyle: TextStyle(
-                        //           fontSize: 18, fontWeight: FontWeight.bold),
-                        //     ),
-                        //   ),
-                        // ),
                         SizedBox(height: isTablet ? 20 : 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
