@@ -140,9 +140,16 @@ class _LandingScreenState extends State<LandingScreen> {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
                   ),
+                  const SizedBox(
+                    height: 40,
+                  ),
                   Image.asset(
-                    AssetImages.landingScreen,
-                    height: constraints.maxWidth * (isTablet ? 0.3 : 0.2),
+                    AssetImages.logo,
+                    width: constraints.maxWidth * (isTablet ? 0.3 : 0.4),
+                    height: constraints.maxWidth * (isTablet ? 0.15 : 0.2),
+                  ),
+                  const SizedBox(
+                    height: 40,
                   ),
                   Container(
                     width: constraints.maxWidth * (isTablet ? 0.85 : 0.85),
@@ -164,12 +171,6 @@ class _LandingScreenState extends State<LandingScreen> {
                         ),
                         const SizedBox(
                           height: 20,
-                        ),
-                        Image.asset(
-                          AssetImages.logo,
-                          width: constraints.maxWidth * (isTablet ? 0.3 : 0.4),
-                          height:
-                              constraints.maxWidth * (isTablet ? 0.15 : 0.2),
                         ),
                         Center(
                           child: Text(
