@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
+import 'package:hrvms_attendence/Utils/connection_provider.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
+import 'package:hrvms_attendence/loginUI/bady_model.dart';
 import 'package:hrvms_attendence/loginUI/login_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart'; // For formatting date
+import 'package:http/http.dart' as http;
 
 class LandingScreen extends StatefulWidget {
   const LandingScreen({super.key});
@@ -51,6 +55,8 @@ class _LandingScreenState extends State<LandingScreen> {
   String currentQuote = "";
   late Timer _timer;
 
+  List<BadyModel>? badyList = [];
+  String? combinedNames;
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
@@ -69,7 +75,7 @@ class _LandingScreenState extends State<LandingScreen> {
         textColor = (colors..shuffle()).first;
       });
     });
-
+    fetchBadyList();
     super.initState();
   }
 
@@ -169,17 +175,20 @@ class _LandingScreenState extends State<LandingScreen> {
                     ),
                   ),
                   Center(
-                    child: ShaderMask(
-                      shaderCallback: (bounds) => const LinearGradient(
-                        colors: [Colors.pink, Colors.orange, Colors.yellow],
-                      ).createShader(bounds),
-                      child: Text(
-                        "🎉 Happy Birthday Mouneshwara Kalal 🎂",
-                        textAlign: TextAlign.center,
-                        style: GoogleFonts.pacifico(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: textColor, // Changing colors dynamically
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: ShaderMask(
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Colors.pink, Colors.orange, Colors.yellow],
+                        ).createShader(bounds),
+                        child: Text(
+                          "🎉 Happy Birthday $combinedNames 🎂",
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.pacifico(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: textColor, // Changing colors dynamically
+                          ),
                         ),
                       ),
                     ),
@@ -276,5 +285,52 @@ class _LandingScreenState extends State<LandingScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> fetchBadyList() async {
+    try {
+      if (await ConnectionProvider().checkConnectivity()) {
+        var url = Uri.parse("http://34.229.118.216:8000/birthdays/");
+        var headers = <String, String>{
+          "content-type": "application/json",
+        };
+        final response = await http.get(url, headers: headers);
+
+        if (response.statusCode == 200) {
+          print("Raw Response: ${response.body}");
+
+          try {
+            var jsonResponse = jsonDecode(response.body);
+
+            // Ensure jsonResponse is a Map
+            if (jsonResponse is Map &&
+                jsonResponse.containsKey("birthday_names")) {
+              List<dynamic> dataList = jsonResponse["birthday_names"];
+              setState(() {
+                if (dataList.isNotEmpty) {
+                  combinedNames = dataList.length > 1
+                      ? "${dataList.sublist(0, dataList.length - 1).join(", ")} & " +
+                          dataList.last
+                      : dataList.first;
+                } else {
+                  badyList = [];
+                }
+              });
+            } else {
+              throw Exception("Unexpected JSON structure: $jsonResponse");
+            }
+          } catch (e) {
+            throw Exception("Error parsing JSON: ${response.body}");
+          }
+        } else {
+          throw Exception(
+              "Failed to fetch data. Status: ${response.statusCode}, Response: ${response.body}");
+        }
+      } else {
+        throw Exception("No internet connection.");
+      }
+    } catch (error) {
+      throw Exception("Error fetching data: ${error.toString()}");
+    }
   }
 }
