@@ -57,6 +57,7 @@ class _LandingScreenState extends State<LandingScreen> {
 
   List<BadyModel>? badyList = [];
   String? combinedNames;
+  List<dynamic> dataList = [];
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
@@ -174,25 +175,34 @@ class _LandingScreenState extends State<LandingScreen> {
                       ),
                     ),
                   ),
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Colors.pink, Colors.orange, Colors.yellow],
-                        ).createShader(bounds),
-                        child: Text(
-                          "🎉 Happy Birthday $combinedNames 🎂",
-                          textAlign: TextAlign.center,
-                          style: GoogleFonts.pacifico(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: textColor, // Changing colors dynamically
+                  dataList != null && dataList.isNotEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: ShaderMask(
+                              shaderCallback: (bounds) => const LinearGradient(
+                                colors: [
+                                  Colors.pink,
+                                  Colors.orange,
+                                  Colors.yellow
+                                ],
+                              ).createShader(bounds),
+                              child: Text(
+                                "🎉 Happy Birthday $combinedNames 🎂",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.pacifico(
+                                  fontSize: 30,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      textColor, // Changing colors dynamically
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
+                        )
+                      : SizedBox
+                          .shrink(), // Hide the widget if dataList is null or empty
+
                   const SizedBox(height: 20),
                   Container(
                     width: constraints.maxWidth * (isTablet ? 0.85 : 0.85),
@@ -305,7 +315,7 @@ class _LandingScreenState extends State<LandingScreen> {
             // Ensure jsonResponse is a Map
             if (jsonResponse is Map &&
                 jsonResponse.containsKey("birthday_names")) {
-              List<dynamic> dataList = jsonResponse["birthday_names"];
+              dataList = jsonResponse["birthday_names"];
               setState(() {
                 if (dataList.isNotEmpty) {
                   combinedNames = dataList.length > 1
@@ -313,7 +323,9 @@ class _LandingScreenState extends State<LandingScreen> {
                           dataList.last
                       : dataList.first;
                 } else {
-                  badyList = [];
+                  setState(() {
+                    combinedNames = "";
+                  });
                 }
               });
             } else {
