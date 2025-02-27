@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
@@ -12,7 +11,6 @@ import 'package:hrvms_attendence/loginUI/login_ui.dart';
 import 'package:hrvms_attendence/registrationUI/register_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:http/http.dart' as http;
 
 class LandingScreen extends StatefulWidget {
@@ -59,6 +57,7 @@ class _LandingScreenState extends State<LandingScreen> {
   late Timer _timer;
   List<BadyModel>? badyList = [];
   String? combinedNames;
+  List<dynamic> dataList = [];
   @override
   void initState() {
     Future.delayed(Duration.zero, () async {
@@ -205,26 +204,34 @@ class _LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                         ),
-                        Center(
-                          child: ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [
-                                Colors.pink,
-                                Colors.orange,
-                                Colors.yellow
-                              ],
-                            ).createShader(bounds),
-                            child: Text(
-                              "🎉 Happy Birthday $combinedNames 🎂",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.pacifico(
-                                fontSize: 30,
-                                fontWeight: FontWeight.bold,
-                                color: textColor, // Changing colors dynamically
-                              ),
-                            ),
-                          ),
-                        ),
+                        dataList != null && dataList.isNotEmpty
+                            ? Center(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: ShaderMask(
+                                    shaderCallback: (bounds) =>
+                                        const LinearGradient(
+                                      colors: [
+                                        Colors.pink,
+                                        Colors.orange,
+                                        Colors.yellow
+                                      ],
+                                    ).createShader(bounds),
+                                    child: Text(
+                                      "🎉 Happy Birthday $combinedNames 🎂",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.pacifico(
+                                        fontSize: 30,
+                                        fontWeight: FontWeight.bold,
+                                        color:
+                                            textColor, // Changing colors dynamically
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : SizedBox
+                                .shrink(), // Hide the widget if dataList is null or empty
                         const SizedBox(height: 20),
                         SizedBox(height: isTablet ? 20 : 10),
                         ElevatedButton(
@@ -292,14 +299,14 @@ class _LandingScreenState extends State<LandingScreen> {
     );
   }
 
-  void _makePhoneCall() async {
-    const phoneNumber = 'tel:9591081220'; // Replace with any number
-    if (await canLaunchUrl(Uri.parse(phoneNumber))) {
-      await launchUrl(Uri.parse(phoneNumber));
-    } else {
-      throw 'Could not launch $phoneNumber';
-    }
-  }
+  // void _makePhoneCall() async {
+  //   const phoneNumber = 'tel:9591081220'; // Replace with any number
+  //   if (await canLaunchUrl(Uri.parse(phoneNumber))) {
+  //     await launchUrl(Uri.parse(phoneNumber));
+  //   } else {
+  //     throw 'Could not launch $phoneNumber';
+  //   }
+  // }
 
   Future<void> fetchBadyList() async {
     try {
@@ -319,7 +326,7 @@ class _LandingScreenState extends State<LandingScreen> {
             // Ensure jsonResponse is a Map
             if (jsonResponse is Map &&
                 jsonResponse.containsKey("birthday_names")) {
-              List<dynamic> dataList = jsonResponse["birthday_names"];
+              dataList = jsonResponse["birthday_names"];
               setState(() {
                 if (dataList.isNotEmpty) {
                   combinedNames = dataList.length > 1
