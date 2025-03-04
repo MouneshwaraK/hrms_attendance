@@ -322,6 +322,46 @@ class _LoginUIState extends State<LoginUI> {
     });
   }
 
+  Future<void> unlockDoor() async {
+    try {
+      // Set the IP and Port of the biometric device
+      String deviceIP = "192.168.2.202";
+      int devicePort = 4370;
+
+      // Create a TCP socket connection
+      Socket socket = await Socket.connect(deviceIP, devicePort);
+      print("Connected to eSSL Device!");
+
+      // 🔹 Command to unlock door (Hex values - check eSSL SDK)
+      List<int> unlockCommand = [
+        0xAA,
+        0xBB,
+        0xCC,
+        0xDD
+      ]; // Example command, replace with actual
+
+      // Send command
+      socket.add(unlockCommand);
+      await socket.flush(); // Ensure command is sent
+
+      // Read response (if any)
+      socket.listen(
+        (data) {
+          print("Response from device: ${utf8.decode(data)}");
+        },
+        onDone: () {
+          print("Disconnected from device.");
+          socket.destroy();
+        },
+        onError: (error) {
+          print("Error: $error");
+        },
+      );
+    } catch (e) {
+      print("Failed to connect to eSSL device: $e");
+    }
+  }
+
   Widget _message(String msg) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 55, vertical: 15),
         child: Text(

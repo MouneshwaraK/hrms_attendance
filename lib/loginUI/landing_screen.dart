@@ -300,7 +300,12 @@ class _LandingScreenState extends State<LandingScreen> {
   Future<void> fetchBadyList() async {
     try {
       if (await ConnectionProvider().checkConnectivity()) {
-        var url = Uri.parse("http://34.229.118.216:8000/birthdays/");
+        // Get current date in MM-dd format
+        String formattedDate =
+            "${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
+
+        var url = Uri.parse(
+            "http://34.229.118.216:8000/birthdays/?date=$formattedDate");
         var headers = <String, String>{
           "content-type": "application/json",
         };
