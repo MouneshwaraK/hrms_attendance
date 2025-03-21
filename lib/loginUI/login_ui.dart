@@ -303,7 +303,8 @@ class _LoginUIState extends State<LoginUI> {
           } else {
             print('User validated successfully!');
             String name = responseData['recognized_face_data']['name'];
-            String message = "Hey!!, $name! clock in";
+            String clock = responseData['recognized_face_data']['status'];
+            String message = "Hey!!, $name! Clock in";
             await flutterTts.speak(message);
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
