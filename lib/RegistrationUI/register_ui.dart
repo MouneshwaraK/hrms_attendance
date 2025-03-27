@@ -418,7 +418,7 @@ class _RegistrationUIState extends State<RegistrationUI> {
 
       // Send the FormData to the API
       Response response = await ApiService().postResponseBody(
-        url: "http://34.228.44.206:8000/face_register/",
+        url: "http://34.235.114.150:8000/face_register/",
         reqObj: formData,
       );
 
