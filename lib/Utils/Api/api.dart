@@ -6,7 +6,7 @@ class API {
   API() {
     ///****************** Testing Base URL  *******************/
     ///http://34.235.114.150:8000/docs     http://34.229.118.216:8000/docs
-    _dio.options.baseUrl = "http://34.229.118.216:8000/";
+    _dio.options.baseUrl = "http://34.235.114.150:8000/";
 
     _dio.interceptors.add(PrettyDioLogger());
   }
