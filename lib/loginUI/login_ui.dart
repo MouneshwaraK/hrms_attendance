@@ -179,7 +179,7 @@ class _LoginUIState extends State<LoginUI> {
             controller: controller,
             showFlashControl: false,
             showCameraLensControl: false,
-            showCaptureControl: false,
+            showCaptureControl: true,
             indicatorShape: IndicatorShape.defaultShape,
             messageBuilder: (context, face) {
               if (face == null) {
@@ -280,6 +280,7 @@ class _LoginUIState extends State<LoginUI> {
           await flutterTts.speak(errorMessage);
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
+              // Navigator.pop(context, true);
               _refreshScreen();
             }
           });
