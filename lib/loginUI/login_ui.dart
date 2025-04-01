@@ -5,6 +5,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:face_camera/face_camera.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
+import 'package:hrvms_attendence/Utils/Api/api.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
@@ -267,7 +269,8 @@ class _LoginUIState extends State<LoginUI> {
         "image": prefixedBase64Image,
       };
       Response response = await ApiService().validateUser(
-        url: "http://34.235.114.150:8000/face_recognition/",
+        // url: "http://34.235.114.150:8000/face_recognition/",
+        url: ApiConst.recognition,
         reqObj: jsonEncode(payload),
         device_status: "in",
       );

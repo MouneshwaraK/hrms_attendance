@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/UpperCaseTextFormatter.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
@@ -418,8 +419,8 @@ class _RegistrationUIState extends State<RegistrationUI> {
 
       // Send the FormData to the API
       Response response = await ApiService().postResponseBody(
-        url: "http://34.235.114.150:8000/face_register/",
-        // url:
+        // url: "http://34.235.114.150:8000/face_register/",
+        url: ApiConst.registration,
         // "http://34.229.118.216:8000/face_register/", // QA  http://34.229.118.216:8000/docs
 
         reqObj: formData,
