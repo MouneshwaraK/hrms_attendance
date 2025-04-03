@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/connection_provider.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
@@ -305,7 +306,10 @@ class _LandingScreenState extends State<LandingScreen> {
             "${DateTime.now().month.toString().padLeft(2, '0')}-${DateTime.now().day.toString().padLeft(2, '0')}";
 
         var url = Uri.parse(
-            "http://34.229.118.216:8000/birthdays/?date=$formattedDate");
+            // ********** Prod ***************/
+            "${ApiConst.birthdays}/?date=$formattedDate");
+        // ********** QA ***************/
+        // "http://34.229.118.216:8000/birthdays/?date=$formattedDate");
         var headers = <String, String>{
           "content-type": "application/json",
         };
