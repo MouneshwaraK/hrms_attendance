@@ -244,7 +244,11 @@ class _LoginUIState extends State<LoginUI> {
       isFaceDetected = false;
       isImageCaptured = false; // Reset the flag on refresh
     });
-    initializeCameraFun();
+    // initializeCameraFun();
+
+    Future.delayed(const Duration(microseconds: 30), () {
+      Navigator.pop(context, true);
+    });
   }
 
   @override

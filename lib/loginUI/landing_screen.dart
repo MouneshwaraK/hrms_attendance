@@ -134,13 +134,16 @@ class _LandingScreenState extends State<LandingScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  const SizedBox(
+                    height: 40,
+                  ),
                   const Text(
                     "Face Recoginition Attendance System CheckIn",
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                    style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(
-                    height: 40,
+                    height: 60,
                   ),
                   Image.asset(
                     AssetImages.logo,
@@ -148,7 +151,7 @@ class _LandingScreenState extends State<LandingScreen> {
                     height: constraints.maxWidth * (isTablet ? 0.15 : 0.2),
                   ),
                   const SizedBox(
-                    height: 40,
+                    height: 60,
                   ),
                   Container(
                     width: constraints.maxWidth * (isTablet ? 0.85 : 0.85),
@@ -169,7 +172,7 @@ class _LandingScreenState extends State<LandingScreen> {
                           ),
                         ),
                         const SizedBox(
-                          height: 20,
+                          height: 40,
                         ),
                         Center(
                           child: Text(
@@ -181,6 +184,9 @@ class _LandingScreenState extends State<LandingScreen> {
                               fontWeight: FontWeight.bold, // Makes text bold
                             ),
                           ),
+                        ),
+                        const SizedBox(
+                          height: 30,
                         ),
                         Center(
                           child: Padding(
@@ -230,7 +236,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                   ),
                                 ),
                               )
-                            : SizedBox
+                            : const SizedBox
                                 .shrink(), // Hide the widget if dataList is null or empty
                         const SizedBox(height: 20),
                         SizedBox(height: isTablet ? 20 : 10),
@@ -260,7 +266,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                 fontSize: 20, fontWeight: FontWeight.w600),
                           ),
                         ),
-                        SizedBox(height: isTablet ? 20 : 10),
+                        SizedBox(height: isTablet ? 30 : 10),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
@@ -287,6 +293,7 @@ class _LandingScreenState extends State<LandingScreen> {
                                 fontSize: 20, fontWeight: FontWeight.w600),
                           ),
                         ),
+                        SizedBox(height: isTablet ? 30 : 10),
                       ],
                     ),
                   ),
