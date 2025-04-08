@@ -245,8 +245,7 @@ class _LoginUIState extends State<LoginUI> {
       isImageCaptured = false; // Reset the flag on refresh
     });
     // initializeCameraFun();
-
-    Future.delayed(const Duration(microseconds: 30), () {
+    flutterTts.setCompletionHandler(() {
       Navigator.pop(context, true);
     });
   }
