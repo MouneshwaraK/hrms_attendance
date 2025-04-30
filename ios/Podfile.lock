@@ -366,8 +366,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/vibration/ios"
 
 SPEC CHECKSUMS:
-  camera_avfoundation: 759172d1a77ae7be0de08fc104cfb79738b8a59e
-  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  camera_avfoundation: adb0207d868b2d873e895371d88448399ab78d87
+  device_info_plus: bf2e3232933866d73fe290f2942f2156cdd10342
   face_camera: 787c50bc183b37c9b6f9777a1416e5b384b5c234
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_tts: 0f492aab6accf87059b72354fcb4ba934304771d
