@@ -1,0 +1,2 @@
+/Users/mouneshwara/Documents/GitHub/hrms_attendance/android/app/.cxx/Debug/3d423n1y/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/mouneshwara/Documents/GitHub/hrms_attendance/android/app/.cxx/Debug/3d423n1y/arm64-v8a/CMakeFiles/rebuild_cache.dir
