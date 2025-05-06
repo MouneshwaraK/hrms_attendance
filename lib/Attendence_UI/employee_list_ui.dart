@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hrvms_attendence/Attendence_UI/capture_facee_ui.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
-import 'package:slider_button/slider_button.dart';
+// import 'package:slider_button/slider_button.dart';
 
 class EmployeeListUI extends StatefulWidget {
   const EmployeeListUI({super.key});
@@ -165,34 +165,34 @@ class _EmployeeListUIState extends State<EmployeeListUI> {
                 );
               }),
             ),
-            SliderButton(
-                action: () async {
-                  final camera = await availableCameras();
-                  final firstCamera = camera.last;
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => CaptureFaceUI(
-                              camera: firstCamera,
-                            )),
-                  );
-                  return true;
-                },
-                label: const Text(
-                  "Swipe to Check In",
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17),
-                ),
-                icon: CircleAvatar(
-                    radius: 45,
-                    backgroundColor: ColorConst().blue,
-                    child: const Icon(
-                      Icons.arrow_forward_outlined,
-                      size: 35,
-                      color: Colors.white,
-                    )))
+            // SliderButton(
+            //     action: () async {
+            //       final camera = await availableCameras();
+            //       final firstCamera = camera.last;
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //             builder: (context) => CaptureFaceUI(
+            //                   camera: firstCamera,
+            //                 )),
+            //       );
+            //       return true;
+            //     },
+            //     label: const Text(
+            //       "Swipe to Check In",
+            //       style: TextStyle(
+            //           color: Colors.black,
+            //           fontWeight: FontWeight.w500,
+            //           fontSize: 17),
+            //     ),
+            //     icon: CircleAvatar(
+            //         radius: 45,
+            //         backgroundColor: ColorConst().blue,
+            //         child: const Icon(
+            //           Icons.arrow_forward_outlined,
+            //           size: 35,
+            //           color: Colors.white,
+            //         )))
           ],
         ),
       ),

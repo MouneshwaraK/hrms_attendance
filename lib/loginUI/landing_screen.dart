@@ -210,7 +210,7 @@ class _LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                         ),
-                        dataList != null && dataList.isNotEmpty
+                        dataList.isNotEmpty
                             ? Center(
                                 child: Padding(
                                   padding: const EdgeInsets.all(20),

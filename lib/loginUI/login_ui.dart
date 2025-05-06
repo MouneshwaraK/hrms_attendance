@@ -63,9 +63,7 @@ class _LoginUIState extends State<LoginUI> {
           flutterTts.speak("More than one face detected.");
           print('More than one face detected!');
         }
-        if (image != null) {
-          uploadImage(image);
-        }
+        uploadImage(image);
       },
       onFaceDetected: (Face? face) async {
         if (face != null && _isFaceValid(face)) {

@@ -10,9 +10,9 @@ class BadyModel {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['date'] = this.date;
-    data['birthday_names'] = this.birthdayNames;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['date'] = date;
+    data['birthday_names'] = birthdayNames;
     return data;
   }
 }
