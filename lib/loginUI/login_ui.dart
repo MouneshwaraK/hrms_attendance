@@ -54,7 +54,7 @@ class _LoginUIState extends State<LoginUI> {
           ),
         );
 
-// Detect faces
+        // Detect faces
         final inputImage = InputImage.fromFilePath(image!.path);
         final List<Face> faces = await faceDetector.processImage(inputImage);
 
@@ -283,29 +283,19 @@ class _LoginUIState extends State<LoginUI> {
           String errorMessage = responseData['errorMessage'];
           print('Error: $errorMessage');
           await flutterTts.speak(errorMessage);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              // Navigator.pop(context, true);
-              _refreshScreen();
-            }
-          });
-
+          _refreshScreen();
           setState(() {
             isFaceDetected = false;
           });
         } else {
           if (responseData['recognized_face_data']['name'] == null) {
             await flutterTts.speak("User not registered");
+            _refreshScreen();
           } else {
             String name = responseData['recognized_face_data']['name'];
             String message = "Hey!!, $name! clock out";
             await flutterTts.speak(message);
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                _refreshScreen();
-              }
-            });
-
+            _refreshScreen();
             setState(() {
               isFaceDetected = true;
             });
