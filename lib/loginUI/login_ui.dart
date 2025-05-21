@@ -9,6 +9,7 @@ import 'package:hrvms_attendence/Utils/Api/ApiConst.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
+import 'package:hrvms_attendence/loginUI/landing_screen.dart';
 import 'package:image/image.dart' as img;
 
 class LoginUI extends StatefulWidget {
@@ -72,10 +73,8 @@ class _LoginUIState extends State<LoginUI> {
             setState(() {
               isImageCaptured = true; // Prevent further captures
             });
-
             // Capture the image
             controller.captureImage();
-
             // Reset the flag after processing
             await Future.delayed(const Duration(
                 seconds: 1)); // Small delay to avoid quick resets
@@ -116,11 +115,7 @@ class _LoginUIState extends State<LoginUI> {
           title: const Text('FaceCamera app'),
         ),
         body: Builder(builder: (context) {
-          if (_capturedImage != null) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              // _navigateToSuccessfulCheckinScreen(context, _capturedImage);
-            });
-          } else {
+          if (_capturedImage == null) {
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -191,8 +186,11 @@ class _LoginUIState extends State<LoginUI> {
                   //     "No face detected. Place your face in the camera.");
                   updateStateSafely(() {
                     hasSpoken = true;
+                    _refreshScreen();
                   });
                 }
+                // Defer the screen refresh until after build completes
+
                 return _message('No face detected');
               } else if (!face.wellPositioned) {
                 if (!hasSpoken) {
@@ -235,16 +233,28 @@ class _LoginUIState extends State<LoginUI> {
     });
   }
 
+  // void _refreshScreen() {
+  //   // setState(() {
+  //   //   _capturedImage = null;
+  //   //   isFaceDetected = false;
+  //   //   isImageCaptured = false; // Reset the flag on refresh
+  //   // });
+  //   // initializeCameraFun();
+  //   flutterTts.setCompletionHandler(() {
+  //     Navigator.pop(context, true);
+  //     initializeCameraFun();
+  //   });
+  // }
   void _refreshScreen() {
     setState(() {
       _capturedImage = null;
       isFaceDetected = false;
       isImageCaptured = false; // Reset the flag on refresh
     });
-    // initializeCameraFun();
-    flutterTts.setCompletionHandler(() {
-      Navigator.pop(context, true);
-    });
+    // Re-initialize the camera controller
+    initializeCameraFun();
+    // Optionally, you can stop TTS if needed
+    flutterTts.stop();
   }
 
   @override
@@ -283,19 +293,39 @@ class _LoginUIState extends State<LoginUI> {
           String errorMessage = responseData['errorMessage'];
           print('Error: $errorMessage');
           await flutterTts.speak(errorMessage);
-          _refreshScreen();
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LandingScreen()),
+              );
+            }
+          });
+
           setState(() {
             isFaceDetected = false;
           });
         } else {
           if (responseData['recognized_face_data']['name'] == null) {
             await flutterTts.speak("User not registered");
-            _refreshScreen();
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                );
+              }
+            });
           } else {
             String name = responseData['recognized_face_data']['name'];
             String message = "Hey!!, $name! clock out";
             await flutterTts.speak(message);
-            _refreshScreen();
+            Future.delayed(const Duration(seconds: 2), () {
+              if (mounted) {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                );
+              }
+            });
+
             setState(() {
               isFaceDetected = true;
             });
@@ -315,46 +345,6 @@ class _LoginUIState extends State<LoginUI> {
       isImageCaptured = false;
       _refreshScreen();
     });
-  }
-
-  Future<void> unlockDoor() async {
-    try {
-      // Set the IP and Port of the biometric device
-      String deviceIP = "192.168.2.202";
-      int devicePort = 4370;
-
-      // Create a TCP socket connection
-      Socket socket = await Socket.connect(deviceIP, devicePort);
-      print("Connected to eSSL Device!");
-
-      // 🔹 Command to unlock door (Hex values - check eSSL SDK)
-      List<int> unlockCommand = [
-        0xAA,
-        0xBB,
-        0xCC,
-        0xDD
-      ]; // Example command, replace with actual
-
-      // Send command
-      socket.add(unlockCommand);
-      await socket.flush(); // Ensure command is sent
-
-      // Read response (if any)
-      socket.listen(
-        (data) {
-          print("Response from device: ${utf8.decode(data)}");
-        },
-        onDone: () {
-          print("Disconnected from device.");
-          socket.destroy();
-        },
-        onError: (error) {
-          print("Error: $error");
-        },
-      );
-    } catch (e) {
-      print("Failed to connect to eSSL device: $e");
-    }
   }
 
   Widget _message(String msg) => Padding(

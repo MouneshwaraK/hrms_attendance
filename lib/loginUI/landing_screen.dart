@@ -273,10 +273,15 @@ class _LandingScreenState extends State<LandingScreen> {
                             ),
                           ),
                           onPressed: () {
-                            Navigator.push(
-                              context,
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //       builder: (context) => const LoginUI()),
+                            // );
+                            Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
                                   builder: (context) => const LoginUI()),
+                              (Route<dynamic> route) => false,
                             );
                           },
                           child: const Text(
