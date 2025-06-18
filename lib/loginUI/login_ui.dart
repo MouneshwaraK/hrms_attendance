@@ -287,19 +287,20 @@ class _LoginUIState extends State<LoginUI> {
       );
       print(image.path);
       if (response.statusCode == 200) {
+        await flutterTts.awaitSpeakCompletion(true);
         Map<String, dynamic> responseData = response.data;
 
         if (responseData['Status'] == 'error') {
           String errorMessage = responseData['errorMessage'];
           print('Error: $errorMessage');
+
           await flutterTts.speak(errorMessage);
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) {
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(builder: (_) => const LandingScreen()),
-              );
-            }
-          });
+
+          if (mounted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const LandingScreen()),
+            );
+          }
 
           setState(() {
             isFaceDetected = false;
@@ -307,24 +308,23 @@ class _LoginUIState extends State<LoginUI> {
         } else {
           if (responseData['recognized_face_data']['name'] == null) {
             await flutterTts.speak("User not registered");
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const LandingScreen()),
-                );
-              }
-            });
+
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LandingScreen()),
+              );
+            }
           } else {
             String name = responseData['recognized_face_data']['name'];
             String message = "Hey!!, $name! clock out";
+
             await flutterTts.speak(message);
-            Future.delayed(const Duration(seconds: 2), () {
-              if (mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (_) => const LandingScreen()),
-                );
-              }
-            });
+
+            if (mounted) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LandingScreen()),
+              );
+            }
 
             setState(() {
               isFaceDetected = true;
