@@ -10,6 +10,7 @@ import 'package:hrvms_attendence/Utils/Api/api.dart';
 import 'package:hrvms_attendence/Utils/Api/api_service.dart';
 import 'package:hrvms_attendence/Utils/colors.dart';
 import 'package:hrvms_attendence/Utils/images.dart';
+import 'package:hrvms_attendence/loginUI/landing_screen.dart';
 import 'package:image/image.dart' as img;
 
 class LoginUI extends StatefulWidget {
@@ -190,6 +191,7 @@ class _LoginUIState extends State<LoginUI> {
                   //     "No face detected. Place your face in the camera.");
                   updateStateSafely(() {
                     hasSpoken = true;
+                    _refreshScreen();
                   });
                 }
                 return _message('No face detected');
@@ -236,16 +238,28 @@ class _LoginUIState extends State<LoginUI> {
     });
   }
 
+  // void _refreshScreen() {
+  //   setState(() {
+  //     _capturedImage = null;
+  //     isFaceDetected = false;
+  //     isImageCaptured = false; // Reset the flag on refresh
+  //   });
+  //   // initializeCameraFun();
+  //   // flutterTts.setCompletionHandler(() {
+  //   //   Navigator.pop(context, true);
+  //   // });
+  // }
+
   void _refreshScreen() {
     setState(() {
       _capturedImage = null;
       isFaceDetected = false;
       isImageCaptured = false; // Reset the flag on refresh
     });
-    // initializeCameraFun();
-    flutterTts.setCompletionHandler(() {
-      Navigator.pop(context, true);
-    });
+    // Re-initialize the camera controller
+    initializeCameraFun();
+    // Optionally, you can stop TTS if needed
+    flutterTts.stop();
   }
 
   @override
@@ -285,7 +299,9 @@ class _LoginUIState extends State<LoginUI> {
           await flutterTts.speak(errorMessage);
           Future.delayed(const Duration(seconds: 2), () {
             if (mounted) {
-              _refreshScreen();
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(builder: (_) => const LandingScreen()),
+              );
             }
           });
 
@@ -297,7 +313,9 @@ class _LoginUIState extends State<LoginUI> {
             await flutterTts.speak("User not registered");
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
-                _refreshScreen();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                );
               }
             });
 
@@ -312,9 +330,16 @@ class _LoginUIState extends State<LoginUI> {
             await flutterTts.speak(message);
             Future.delayed(const Duration(seconds: 2), () {
               if (mounted) {
-                _refreshScreen();
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => const LandingScreen()),
+                );
               }
             });
+            // Future.delayed(const Duration(seconds: 2), () {
+            //   if (mounted) {
+            //     _refreshScreen();
+            //   }
+            // });
 
             setState(() {
               isFaceDetected = true;
